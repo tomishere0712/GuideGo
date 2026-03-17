@@ -1,3 +1,151 @@
 <resources>
     <string name="app_name">GuideGo</string>
+
+    <!-- Auth -->
+    <string name="login">Đăng nhập</string>
+    <string name="register">Đăng ký</string>
+    <string name="logout">Đăng xuất</string>
+    <string name="email">Email</string>
+    <string name="password">Mật khẩu</string>
+    <string name="confirm_password">Xác nhận mật khẩu</string>
+    <string name="full_name">Họ và tên</string>
+    <string name="phone">Số điện thoại</string>
+    <string name="hint_email">Nhập email của bạn</string>
+    <string name="hint_password">Nhập mật khẩu</string>
+    <string name="hint_full_name">Nhập họ và tên</string>
+    <string name="hint_phone">Nhập số điện thoại</string>
+    <string name="no_account">Chưa có tài khoản? </string>
+    <string name="have_account">Đã có tài khoản? </string>
+    <string name="register_now">Đăng ký ngay</string>
+    <string name="login_now">Đăng nhập ngay</string>
+    <string name="welcome_back">Chào mừng trở lại!</string>
+    <string name="login_subtitle">Đăng nhập để tiếp tục khám phá</string>
+    <string name="register_title">Tạo tài khoản</string>
+    <string name="register_subtitle">Tham gia cùng hàng nghìn du khách</string>
+
+    <!-- Home -->
+    <string name="greeting_morning">Chào buổi sáng,</string>
+    <string name="greeting_afternoon">Chào buổi chiều,</string>
+    <string name="greeting_evening">Chào buổi tối,</string>
+    <string name="search_hint">Tìm điểm đến, tour du lịch...</string>
+    <string name="featured_tours">Tour nổi bật</string>
+    <string name="all_tours">Tất cả tour</string>
+    <string name="popular_destinations">Điểm đến phổ biến</string>
+    <string name="see_all">Xem tất cả</string>
+    <string name="explore">Khám phá</string>
+
+    <!-- Tour Detail -->
+    <string name="tour_detail">Chi tiết tour</string>
+    <string name="description">Mô tả</string>
+    <string name="schedule">Lịch khởi hành</string>
+    <string name="reviews">Đánh giá</string>
+    <string name="guide_info">Thông tin hướng dẫn viên</string>
+    <string name="verified_guide">Hướng dẫn viên đã xác minh</string>
+    <string name="experience_years">năm kinh nghiệm</string>
+    <string name="languages">Ngôn ngữ:</string>
+    <string name="add_to_cart">Thêm vào giỏ</string>
+    <string name="book_now">Đặt ngay</string>
+    <string name="select_schedule">Chọn lịch khởi hành</string>
+    <string name="number_of_people">Số người</string>
+    <string name="per_person">/ người</string>
+    <string name="duration_days">ngày</string>
+    <string name="max_people">Tối đa %d người</string>
+    <string name="available_spots">Còn %d chỗ</string>
+    <string name="rating_count">(%d đánh giá)</string>
+    <string name="no_reviews">Chưa có đánh giá</string>
+    <string name="no_schedules">Không có lịch khởi hành</string>
+    <string name="write_review">Viết đánh giá</string>
+
+    <!-- Cart -->
+    <string name="cart">Giỏ hàng</string>
+    <string name="cart_empty">Giỏ hàng trống</string>
+    <string name="cart_empty_desc">Hãy thêm tour bạn muốn khám phá!</string>
+    <string name="items_count">%d tour</string>
+    <string name="subtotal">Tổng tiền:</string>
+    <string name="checkout">Đặt tour</string>
+    <string name="remove_item">Xóa</string>
+    <string name="people_count">%d người</string>
+
+    <!-- Booking -->
+    <string name="my_bookings">Đơn đặt của tôi</string>
+    <string name="booking_empty">Chưa có đơn đặt nào</string>
+    <string name="booking_empty_desc">Khám phá và đặt tour ngay hôm nay!</string>
+    <string name="booking_code">Mã đơn: %s</string>
+    <string name="cancel_booking">Hủy đơn</string>
+    <string name="booking_date">Ngày đặt: %s</string>
+    <string name="total_amount">Tổng tiền: %s</string>
+    <string name="status_pending">Chờ xác nhận</string>
+    <string name="status_confirmed">Đã xác nhận</string>
+    <string name="status_completed">Hoàn thành</string>
+    <string name="status_cancelled">Đã hủy</string>
+
+    <!-- Payment -->
+    <string name="payment">Thanh toán</string>
+    <string name="payment_method">Phương thức thanh toán</string>
+    <string name="cash">Tiền mặt</string>
+    <string name="bank_transfer">Chuyển khoản</string>
+    <string name="credit_card">Thẻ tín dụng</string>
+    <string name="pay_now">Thanh toán ngay</string>
+    <string name="payment_success">Thanh toán thành công!</string>
+    <string name="payment_success_desc">Đơn đặt tour của bạn đã được xác nhận</string>
+    <string name="back_to_home">Về trang chủ</string>
+    <string name="order_summary">Tóm tắt đơn hàng</string>
+    <string name="total_payment">Tổng thanh toán</string>
+
+    <!-- Profile -->
+    <string name="profile">Hồ sơ</string>
+    <string name="edit_profile">Chỉnh sửa hồ sơ</string>
+    <string name="my_profile">Thông tin cá nhân</string>
+    <string name="settings">Cài đặt</string>
+    <string name="member_since">Thành viên từ %s</string>
+    <string name="tourist_role">Du khách</string>
+    <string name="guide_role">Hướng dẫn viên</string>
+    <string name="admin_role">Quản trị viên</string>
+    <string name="save">Lưu</string>
+    <string name="cancel">Hủy</string>
+
+    <!-- Search -->
+    <string name="search">Tìm kiếm</string>
+    <string name="search_results">Kết quả tìm kiếm</string>
+    <string name="filter">Lọc</string>
+    <string name="sort_by">Sắp xếp theo</string>
+    <string name="no_results">Không tìm thấy kết quả</string>
+    <string name="no_results_desc">Thử tìm kiếm với từ khóa khác</string>
+    <string name="city_filter">Thành phố</string>
+    <string name="price_filter">Giá</string>
+    <string name="duration_filter">Thời gian</string>
+    <string name="search_tours">Tìm tour</string>
+    <string name="all_cities">Tất cả thành phố</string>
+
+    <!-- Common -->
+    <string name="loading">Đang tải...</string>
+    <string name="error_network">Lỗi kết nối mạng</string>
+    <string name="error_server">Lỗi máy chủ, vui lòng thử lại</string>
+    <string name="error_unknown">Đã xảy ra lỗi</string>
+    <string name="retry">Thử lại</string>
+    <string name="ok">OK</string>
+    <string name="yes">Có</string>
+    <string name="no">Không</string>
+    <string name="confirm">Xác nhận</string>
+    <string name="delete">Xóa</string>
+    <string name="back">Quay lại</string>
+    <string name="share">Chia sẻ</string>
+    <string name="location">Địa điểm</string>
+    <string name="price_from">Từ %s</string>
+    <string name="vnd_format">%,.0f ₫</string>
+    <string name="add_to_cart_success">Đã thêm vào giỏ hàng!</string>
+    <string name="remove_confirm_title">Xác nhận xóa</string>
+    <string name="remove_confirm_msg">Bạn có muốn xóa tour này khỏi giỏ hàng?</string>
+    <string name="cancel_booking_title">Xác nhận hủy đơn</string>
+    <string name="cancel_booking_msg">Bạn có muốn hủy đơn đặt này không?</string>
+
+    <!-- Bottom Nav -->
+    <string name="nav_home">Trang chủ</string>
+    <string name="nav_search">Tìm kiếm</string>
+    <string name="nav_cart">Giỏ hàng</string>
+    <string name="nav_bookings">Đơn đặt</string>
+    <string name="nav_profile">Hồ sơ</string>
+
+    <!-- Splash -->
+    <string name="app_tagline">Khám phá Việt Nam cùng hướng dẫn viên địa phương</string>
 </resources>
