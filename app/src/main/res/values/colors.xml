@@ -2,4 +2,49 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Primary Brand Colors -->
+    <color name="colorPrimary">#006AF3</color>
+    <color name="colorPrimaryDark">#0055C8</color>
+    <color name="colorPrimaryLight">#4D9AF7</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
+
+    <!-- Accent / CTA -->
+    <color name="colorAccent">#FF6B35</color>
+    <color name="colorAccentDark">#E05520</color>
+
+    <!-- Backgrounds -->
+    <color name="colorBackground">#F4F6FA</color>
+    <color name="colorSurface">#FFFFFF</color>
+    <color name="colorSurfaceVariant">#EEF2F8</color>
+
+    <!-- Text -->
+    <color name="colorTextPrimary">#1C1C1E</color>
+    <color name="colorTextSecondary">#6C6C70</color>
+    <color name="colorTextHint">#AEAEB2</color>
+    <color name="colorTextOnDark">#FFFFFF</color>
+
+    <!-- Status -->
+    <color name="colorSuccess">#30D158</color>
+    <color name="colorWarning">#FF9F0A</color>
+    <color name="colorError">#FF3B30</color>
+
+    <!-- Rating -->
+    <color name="colorStar">#FFB800</color>
+
+    <!-- Divider -->
+    <color name="colorDivider">#E5E5EA</color>
+    <color name="colorBorder">#D1D1D6</color>
+
+    <!-- Booking Status -->
+    <color name="statusPending">#FF9F0A</color>
+    <color name="statusConfirmed">#006AF3</color>
+    <color name="statusCompleted">#30D158</color>
+    <color name="statusCancelled">#FF3B30</color>
+
+    <!-- Overlay -->
+    <color name="colorShadow">#1A000000</color>
+    <color name="colorOverlay">#80000000</color>
+    <color name="colorGradientStart">#006AF3</color>
+    <color name="colorGradientEnd">#0039A8</color>
 </resources>
