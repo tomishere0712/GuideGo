@@ -42,6 +42,10 @@ public class Tour {
     private String updatedAt;
     @SerializedName("schedules")
     private List<TourSchedule> schedules;
+    @SerializedName("latitude")
+    private double latitude;
+    @SerializedName("longitude")
+    private double longitude;
 
     // Helper: get image URL from picsum based on tour id seed
     public String getImageUrl() {
@@ -87,5 +91,20 @@ public class Tour {
     public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
     public List<TourSchedule> getSchedules() { return schedules; }
     public void setSchedules(List<TourSchedule> schedules) { this.schedules = schedules; }
-}
 
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+}

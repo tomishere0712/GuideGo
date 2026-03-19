@@ -1,9 +1,12 @@
 package com.example.guidego.ui.tour;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -17,13 +20,15 @@ import com.example.guidego.model.request.AddToCartRequest;
 import com.example.guidego.model.response.StatusResponse;
 import com.example.guidego.utils.Constants;
 import com.example.guidego.utils.FormatUtils;
+import com.google.android.gms.maps.model.LatLng;
+
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class TourDetailActivity extends AppCompatActivity {
-
+public class TourDetailActivity extends AppCompatActivity{
     private ActivityTourDetailBinding binding;
     private ScheduleAdapter scheduleAdapter;
     private Tour currentTour;
@@ -38,12 +43,47 @@ public class TourDetailActivity extends AppCompatActivity {
         String tourId = getIntent().getStringExtra(Constants.EXTRA_TOUR_ID);
         if (tourId == null) { finish(); return; }
 
+        binding.mapPreview.onCreate(savedInstanceState);
+
         setupScheduleAdapter();
         setupPeopleCounter();
+
         binding.btnBack.setOnClickListener(v -> finish());
         binding.btnAddToCart.setOnClickListener(v -> addToCart());
 
+        binding.btnOpenMap.setOnClickListener(v -> openGoogleMaps());
+
         loadTourDetail(tourId);
+    }
+
+    @Override
+    protected void onResume() { super.onResume(); binding.mapPreview.onResume(); }
+    @Override
+    protected void onPause() { super.onPause(); binding.mapPreview.onPause(); }
+    @Override
+    protected void onDestroy() { super.onDestroy(); binding.mapPreview.onDestroy(); }
+    @Override
+    public void onLowMemory() { super.onLowMemory(); binding.mapPreview.onLowMemory(); }
+
+
+    private void openGoogleMaps() {
+        if (currentTour != null && currentTour.getLatitude() != 0) {
+            String uri = String.format(Locale.ENGLISH, "geo:%f,%f?q=%f,%f(%s)",
+                    currentTour.getLatitude(), currentTour.getLongitude(),
+                    currentTour.getLatitude(), currentTour.getLongitude(),
+                    currentTour.getTitle());
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+            intent.setPackage("com.google.android.apps.maps");
+
+            try {
+                startActivity(intent);
+            } catch (Exception e) {
+                // Mở bằng trình duyệt nếu máy không có app Google Maps
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(uri)));
+            }
+        } else {
+            Toast.makeText(this, "Thông tin vị trí chưa được cập nhật", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void setupScheduleAdapter() {
@@ -124,6 +164,18 @@ public class TourDetailActivity extends AppCompatActivity {
         } else {
             binding.tvNoSchedules.setVisibility(View.VISIBLE);
         }
+
+        if (tour.getLatitude() !=0) {
+            binding.mapPreview.onCreate(null); // Khởi tạo cho Lite Mode
+            binding.mapPreview.getMapAsync(googleMap -> {
+                LatLng pos = new LatLng(tour.getLatitude(), tour.getLongitude());
+                googleMap.addMarker(new com.google.android.gms.maps.model.MarkerOptions().position(pos));
+                googleMap.moveCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLngZoom(pos, 15f));
+
+                // Nhấn vào bản đồ nhỏ cũng mở luôn Google Maps lớn
+                googleMap.setOnMapClickListener(latLng -> openGoogleMaps());
+            });
+        }
     }
 
     private void addToCart() {
@@ -158,4 +210,3 @@ public class TourDetailActivity extends AppCompatActivity {
                 });
     }
 }
-

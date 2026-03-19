@@ -108,9 +108,12 @@
 
                         <!-- Location -->
                         <LinearLayout
+                            android:id="@+id/btn_open_map"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:clickable="true"
+                            android:focusable="true"
                             android:gravity="center_horizontal"
                             android:orientation="vertical">
 
@@ -271,6 +274,22 @@
                         </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Map Preview Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+
+                <com.google.android.gms.maps.MapView
+                    android:id="@+id/map_preview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:liteMode="true" />
             </androidx.cardview.widget.CardView>
 
             <!-- Description Card -->
