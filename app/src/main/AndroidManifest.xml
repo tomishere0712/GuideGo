@@ -83,5 +83,34 @@
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
+
+        <!-- Guide -->
+        <activity
+            android:name=".ui.guide.GuideMainActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.guide.CreateEditTourActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ui.guide.ManageSchedulesActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.guide.RegisterGuideActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Admin -->
+        <activity
+            android:name=".ui.admin.AdminMainActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
     </application>
 </manifest>

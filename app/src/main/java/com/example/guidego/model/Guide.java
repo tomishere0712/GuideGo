@@ -6,18 +6,27 @@ import java.util.List;
 public class Guide {
     @SerializedName("id")
     private String id;
-    @SerializedName("userId")
+
+    @SerializedName(value = "user_id", alternate = {"userId"})
     private String userId;
-    @SerializedName("experienceYears")
+
+    @SerializedName(value = "experience_years", alternate = {"experienceYears"})
     private int experienceYears;
+
     @SerializedName("languages")
     private List<String> languages;
+
     @SerializedName("description")
     private String description;
+
     @SerializedName("rating")
     private double rating;
-    @SerializedName("isVerified")
+
+    @SerializedName(value = "is_verified", alternate = {"isVerified"})
     private boolean isVerified;
+
+    @SerializedName("user")
+    private User user;
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -33,5 +42,6 @@ public class Guide {
     public void setRating(double rating) { this.rating = rating; }
     public boolean isVerified() { return isVerified; }
     public void setVerified(boolean verified) { isVerified = verified; }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 }
-

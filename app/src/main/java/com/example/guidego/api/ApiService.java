@@ -5,6 +5,7 @@ import com.example.guidego.model.Cart;
 import com.example.guidego.model.ChatMessage;
 import com.example.guidego.model.ChatRoom;
 import com.example.guidego.model.Guide;
+import com.example.guidego.model.Location;
 import com.example.guidego.model.Payment;
 import com.example.guidego.model.Review;
 import com.example.guidego.model.Tour;
@@ -13,20 +14,24 @@ import com.example.guidego.model.TourSearchResponse;
 import com.example.guidego.model.User;
 import com.example.guidego.model.request.AddToCartRequest;
 import com.example.guidego.model.request.CreateBookingRequest;
+import com.example.guidego.model.request.CreateLocationRequest;
 import com.example.guidego.model.request.CreatePaymentRequest;
 import com.example.guidego.model.request.CreateReviewRequest;
+import com.example.guidego.model.request.CreateScheduleRequest;
+import com.example.guidego.model.request.CreateTourRequest;
+import com.example.guidego.model.request.CreateUserRequest;
 import com.example.guidego.model.request.LoginRequest;
+import com.example.guidego.model.request.RegisterGuideRequest;
 import com.example.guidego.model.request.RegisterRequest;
 import com.example.guidego.model.request.SendMessageRequest;
-
-import java.util.Map;
-
-import okhttp3.ResponseBody;
-import retrofit2.http.QueryMap;
+import com.example.guidego.model.request.UpdateGuideRequest;
 import com.example.guidego.model.request.UpdateProfileRequest;
 import com.example.guidego.model.request.UpdateReviewRequest;
+import com.example.guidego.model.request.UpdateScheduleRequest;
 import com.example.guidego.model.request.VnPayRequest;
+import com.example.guidego.model.response.CreateDataResponse;
 import com.example.guidego.model.response.GuidesResponse;
+import com.example.guidego.model.response.LocationResponse;
 import com.example.guidego.model.response.LoginResponse;
 import com.example.guidego.model.response.StatusResponse;
 import com.example.guidego.model.response.VnPayResponse;
@@ -34,12 +39,16 @@ import com.example.guidego.model.response.VnPayResponse;
 import java.util.List;
 import java.util.Map;
 
+import okhttp3.MultipartBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.QueryMap;
@@ -54,11 +63,20 @@ public interface ApiService {
     Call<LoginResponse> login(@Body LoginRequest body);
 
     // ===== USER =====
+    @GET("user")
+    Call<List<User>> getAllUsers();
+
     @GET("user/{id}")
     Call<User> getUserById(@Path("id") String id);
 
+    @POST("user")
+    Call<StatusResponse> createUser(@Body CreateUserRequest body);
+
     @PUT("user/{id}")
     Call<StatusResponse> updateUser(@Path("id") String id, @Body UpdateProfileRequest body);
+
+    @DELETE("user/{id}")
+    Call<StatusResponse> deleteUser(@Path("id") String id);
 
     // ===== TOUR =====
     @GET("tour")
@@ -70,12 +88,34 @@ public interface ApiService {
     @GET("tour/{id}")
     Call<Tour> getTourById(@Path("id") String id);
 
-    // ===== TOUR SCHEDULES (Tourist: read-only) =====
+    @POST("tour")
+    Call<CreateDataResponse> createTour(@Body CreateTourRequest body);
+
+    @PUT("tour/{id}")
+    Call<StatusResponse> updateTour(@Path("id") String id, @Body CreateTourRequest body);
+
+    @DELETE("tour/{id}")
+    Call<StatusResponse> deleteTour(@Path("id") String id);
+
+    @Multipart
+    @POST("tour/{id}/images")
+    Call<CreateDataResponse> uploadTourImage(@Path("id") String tourId, @Part MultipartBody.Part file);
+
+    // ===== TOUR SCHEDULES =====
     @GET("tour-schedules/tour/{tourId}")
     Call<List<TourSchedule>> getTourSchedules(@Path("tourId") String tourId);
 
     @GET("tour-schedules/{id}")
     Call<TourSchedule> getTourScheduleById(@Path("id") String id);
+
+    @POST("tour-schedules")
+    Call<CreateDataResponse> createTourSchedule(@Body CreateScheduleRequest body);
+
+    @PUT("tour-schedules/{id}")
+    Call<StatusResponse> updateTourSchedule(@Path("id") String id, @Body UpdateScheduleRequest body);
+
+    @DELETE("tour-schedules/{id}")
+    Call<StatusResponse> deleteTourSchedule(@Path("id") String id);
 
     // ===== GUIDE =====
     @GET("guides")
@@ -86,6 +126,34 @@ public interface ApiService {
 
     @GET("guides/user/{userId}")
     Call<GuidesResponse> getGuideByUserId(@Path("userId") String userId);
+
+    @POST("guides")
+    Call<CreateDataResponse> registerGuide(@Body RegisterGuideRequest body);
+
+    @PUT("guides/{id}")
+    Call<StatusResponse> updateGuide(@Path("id") String id, @Body UpdateGuideRequest body);
+
+    @PUT("guides/{id}/verify")
+    Call<StatusResponse> verifyGuide(@Path("id") String id);
+
+    @DELETE("guides/{id}/reject")
+    Call<StatusResponse> rejectGuide(@Path("id") String id);
+
+    // ===== LOCATION =====
+    @GET("location")
+    Call<LocationResponse> getAllLocations();
+
+    @GET("location/{id}")
+    Call<Location> getLocationById(@Path("id") String id);
+
+    @POST("location")
+    Call<CreateDataResponse> createLocation(@Body CreateLocationRequest body);
+
+    @PUT("location/{id}")
+    Call<StatusResponse> updateLocation(@Path("id") String id, @Body CreateLocationRequest body);
+
+    @DELETE("location/{id}")
+    Call<StatusResponse> deleteLocation(@Path("id") String id);
 
     // ===== CART =====
     @GET("cart")
@@ -114,11 +182,9 @@ public interface ApiService {
     @POST("payments/vnpay/create-url")
     Call<VnPayResponse> createVnPayUrl(@Body VnPayRequest body);
 
-    /** Forward VNPay return params to BE so it can verify and update booking status. */
     @GET("payments/vnpay/return")
     Call<ResponseBody> processVnPayReturn(@QueryMap Map<String, String> params);
 
-    // ===== PAYMENT - Legacy (còn giữ cho compatibility) =====
     @POST("payments")
     Call<Payment> createPayment(@Body CreatePaymentRequest body);
 
