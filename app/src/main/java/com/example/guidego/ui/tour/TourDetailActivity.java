@@ -1,5 +1,6 @@
 package com.example.guidego.ui.tour;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,14 +15,19 @@ import com.bumptech.glide.Glide;
 import com.example.guidego.R;
 import com.example.guidego.api.ApiClient;
 import com.example.guidego.databinding.ActivityTourDetailBinding;
+import com.example.guidego.model.ChatRoom;
 import com.example.guidego.model.Tour;
 import com.example.guidego.model.TourSchedule;
 import com.example.guidego.model.request.AddToCartRequest;
 import com.example.guidego.model.response.StatusResponse;
+import com.example.guidego.ui.chat.ChatActivity;
 import com.example.guidego.utils.Constants;
 import com.example.guidego.utils.FormatUtils;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
+import java.util.List;
 import java.util.Locale;
 
 import retrofit2.Call;
@@ -50,8 +56,8 @@ public class TourDetailActivity extends AppCompatActivity{
 
         binding.btnBack.setOnClickListener(v -> finish());
         binding.btnAddToCart.setOnClickListener(v -> addToCart());
-
         binding.btnOpenMap.setOnClickListener(v -> openGoogleMaps());
+        binding.btnChatGuide.setOnClickListener(v -> openChatWithGuide());
 
         loadTourDetail(tourId);
     }
@@ -120,6 +126,8 @@ public class TourDetailActivity extends AppCompatActivity{
                         if (response.isSuccessful() && response.body() != null) {
                             currentTour = response.body();
                             displayTour(currentTour);
+                            // Fetch fresh schedule data separately to get up-to-date available_slots
+                            loadFreshSchedules(tourId);
                         } else {
                             Toast.makeText(TourDetailActivity.this, "Không tìm thấy tour", Toast.LENGTH_SHORT).show();
                             finish();
@@ -131,6 +139,28 @@ public class TourDetailActivity extends AppCompatActivity{
                         binding.progressBar.setVisibility(View.GONE);
                         Toast.makeText(TourDetailActivity.this, "Lỗi kết nối", Toast.LENGTH_SHORT).show();
                         finish();
+                    }
+                });
+    }
+
+    /** Gọi API lịch tour riêng để lấy available_slots cập nhật nhất */
+    private void loadFreshSchedules(String tourId) {
+        ApiClient.getInstance(this).getApiService()
+                .getTourSchedules(tourId)
+                .enqueue(new Callback<List<TourSchedule>>() {
+                    @Override
+                    public void onResponse(Call<List<TourSchedule>> call, Response<List<TourSchedule>> response) {
+                        if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                            // Cập nhật lịch với dữ liệu tươi nhất từ API tour-schedules
+                            scheduleAdapter.setSchedules(response.body());
+                            binding.tvNoSchedules.setVisibility(View.GONE);
+                        }
+                        // Nếu API lỗi → giữ nguyên schedules từ tour response (đã set trước đó)
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<TourSchedule>> call, Throwable t) {
+                        // Không làm gì — schedules từ tour response vẫn được hiển thị
                     }
                 });
     }
@@ -195,16 +225,67 @@ public class TourDetailActivity extends AppCompatActivity{
                         binding.btnAddToCart.setEnabled(true);
                         if (response.isSuccessful()) {
                             Toast.makeText(TourDetailActivity.this, "✅ Đã thêm vào giỏ hàng!", Toast.LENGTH_SHORT).show();
+                            // Refresh lịch để cập nhật available_slots mới nhất
+                            loadFreshSchedules(currentTour.getId());
                         } else if (response.code() == 401) {
                             Toast.makeText(TourDetailActivity.this, "Vui lòng đăng nhập để đặt tour", Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(TourDetailActivity.this, "Không thể thêm vào giỏ. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                            String errorMsg = "Không thể thêm vào giỏ. Vui lòng thử lại.";
+                            try {
+                                if (response.errorBody() != null) {
+                                    String errorJson = response.errorBody().string();
+                                    JsonObject json = new Gson().fromJson(errorJson, JsonObject.class);
+                                    if (json.has("message")) errorMsg = json.get("message").getAsString();
+                                }
+                            } catch (Exception ignored) {}
+                            new AlertDialog.Builder(TourDetailActivity.this)
+                                    .setTitle("Không thể thêm vào giỏ")
+                                    .setMessage(errorMsg)
+                                    .setPositiveButton("OK", null)
+                                    .show();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<StatusResponse> call, Throwable t) {
                         binding.btnAddToCart.setEnabled(true);
+                        Toast.makeText(TourDetailActivity.this, "Lỗi kết nối", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void openChatWithGuide() {
+        if (currentTour == null || currentTour.getGuideId() == null) {
+            Toast.makeText(this, "Không tìm thấy thông tin hướng dẫn viên", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        binding.btnChatGuide.setEnabled(false);
+        ApiClient.getInstance(this).getApiService()
+                .getOrCreateChat(currentTour.getGuideId())
+                .enqueue(new retrofit2.Callback<ChatRoom>() {
+                    @Override
+                    public void onResponse(retrofit2.Call<ChatRoom> call, retrofit2.Response<ChatRoom> response) {
+                        binding.btnChatGuide.setEnabled(true);
+                        if (response.isSuccessful() && response.body() != null) {
+                            ChatRoom chat = response.body();
+                            Intent intent = new Intent(TourDetailActivity.this, ChatActivity.class);
+                            intent.putExtra(Constants.EXTRA_CHAT_ID, chat.getId());
+                            intent.putExtra(Constants.EXTRA_CHAT_NAME,
+                                    currentTour.getGuideName() != null
+                                            ? currentTour.getGuideName() : "Hướng dẫn viên");
+                            startActivity(intent);
+                        } else if (response.code() == 401) {
+                            Toast.makeText(TourDetailActivity.this,
+                                    "Vui lòng đăng nhập để chat", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(TourDetailActivity.this,
+                                    "Không thể mở chat. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(retrofit2.Call<ChatRoom> call, Throwable t) {
+                        binding.btnChatGuide.setEnabled(true);
                         Toast.makeText(TourDetailActivity.this, "Lỗi kết nối", Toast.LENGTH_SHORT).show();
                     }
                 });

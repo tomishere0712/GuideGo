@@ -77,7 +77,7 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Payment Method -->
+            <!-- Payment Method - VNPay -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -99,41 +99,31 @@
                         android:textSize="15sp"
                         android:textStyle="bold" />
 
-                    <RadioGroup
-                        android:id="@+id/rg_payment_method"
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:orientation="vertical">
+                        android:layout_height="56dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_search_bar"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="16dp"
+                        android:orientation="horizontal">
 
-                        <RadioButton
-                            android:id="@+id/rb_cash"
-                            android:layout_width="match_parent"
-                            android:layout_height="48dp"
-                            android:text="💵  Tiền mặt"
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="🔵  VNPay — Cổng thanh toán"
                             android:textColor="@color/colorTextPrimary"
-                            android:textSize="14sp"
-                            android:checked="true"
-                            android:buttonTint="@color/colorPrimary" />
+                            android:textSize="14sp" />
 
-                        <RadioButton
-                            android:id="@+id/rb_bank_transfer"
-                            android:layout_width="match_parent"
-                            android:layout_height="48dp"
-                            android:text="🏦  Chuyển khoản ngân hàng"
-                            android:textColor="@color/colorTextPrimary"
-                            android:textSize="14sp"
-                            android:buttonTint="@color/colorPrimary" />
-
-                        <RadioButton
-                            android:id="@+id/rb_credit_card"
-                            android:layout_width="match_parent"
-                            android:layout_height="48dp"
-                            android:text="💳  Thẻ tín dụng"
-                            android:textColor="@color/colorTextPrimary"
-                            android:textSize="14sp"
-                            android:buttonTint="@color/colorPrimary" />
-                    </RadioGroup>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="✓"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -186,7 +176,7 @@
             style="@style/ButtonAccent"
             android:layout_width="match_parent"
             android:layout_height="52dp"
-            android:text="@string/pay_now" />
+            android:text="@string/pay_vnpay" />
     </LinearLayout>
 
     <!-- Progress Overlay -->

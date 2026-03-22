@@ -52,12 +52,28 @@
             </LinearLayout>
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/iv_selected"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:src="@drawable/ic_verified"
-            android:visibility="gone" />
+        <!-- Right side: checkmark (nếu selected) hoặc badge "Đã qua" -->
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/iv_selected"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_verified"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tv_past_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Đã qua"
+                android:textSize="11sp"
+                android:textColor="#B0B0B0"
+                android:textStyle="italic"
+                android:visibility="gone" />
+        </FrameLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
 

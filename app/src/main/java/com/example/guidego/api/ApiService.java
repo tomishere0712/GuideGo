@@ -2,10 +2,13 @@ package com.example.guidego.api;
 
 import com.example.guidego.model.Booking;
 import com.example.guidego.model.Cart;
+import com.example.guidego.model.ChatMessage;
+import com.example.guidego.model.ChatRoom;
 import com.example.guidego.model.Guide;
 import com.example.guidego.model.Payment;
 import com.example.guidego.model.Review;
 import com.example.guidego.model.Tour;
+import com.example.guidego.model.TourSchedule;
 import com.example.guidego.model.TourSearchResponse;
 import com.example.guidego.model.User;
 import com.example.guidego.model.request.AddToCartRequest;
@@ -14,10 +17,19 @@ import com.example.guidego.model.request.CreatePaymentRequest;
 import com.example.guidego.model.request.CreateReviewRequest;
 import com.example.guidego.model.request.LoginRequest;
 import com.example.guidego.model.request.RegisterRequest;
+import com.example.guidego.model.request.SendMessageRequest;
+
+import java.util.Map;
+
+import okhttp3.ResponseBody;
+import retrofit2.http.QueryMap;
 import com.example.guidego.model.request.UpdateProfileRequest;
+import com.example.guidego.model.request.UpdateReviewRequest;
+import com.example.guidego.model.request.VnPayRequest;
 import com.example.guidego.model.response.GuidesResponse;
 import com.example.guidego.model.response.LoginResponse;
 import com.example.guidego.model.response.StatusResponse;
+import com.example.guidego.model.response.VnPayResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -58,12 +70,22 @@ public interface ApiService {
     @GET("tour/{id}")
     Call<Tour> getTourById(@Path("id") String id);
 
+    // ===== TOUR SCHEDULES (Tourist: read-only) =====
+    @GET("tour-schedules/tour/{tourId}")
+    Call<List<TourSchedule>> getTourSchedules(@Path("tourId") String tourId);
+
+    @GET("tour-schedules/{id}")
+    Call<TourSchedule> getTourScheduleById(@Path("id") String id);
+
     // ===== GUIDE =====
     @GET("guides")
     Call<GuidesResponse> getAllGuides();
 
     @GET("guides/{id}")
     Call<GuidesResponse> getGuideById(@Path("id") String id);
+
+    @GET("guides/user/{userId}")
+    Call<GuidesResponse> getGuideByUserId(@Path("userId") String userId);
 
     // ===== CART =====
     @GET("cart")
@@ -88,12 +110,23 @@ public interface ApiService {
     @PUT("bookings/{id}/cancel")
     Call<StatusResponse> cancelBooking(@Path("id") String id);
 
-    // ===== PAYMENT =====
+    // ===== PAYMENT - VNPay =====
+    @POST("payments/vnpay/create-url")
+    Call<VnPayResponse> createVnPayUrl(@Body VnPayRequest body);
+
+    /** Forward VNPay return params to BE so it can verify and update booking status. */
+    @GET("payments/vnpay/return")
+    Call<ResponseBody> processVnPayReturn(@QueryMap Map<String, String> params);
+
+    // ===== PAYMENT - Legacy (còn giữ cho compatibility) =====
     @POST("payments")
     Call<Payment> createPayment(@Body CreatePaymentRequest body);
 
     @PUT("payments/{id}/confirm")
     Call<Payment> confirmPayment(@Path("id") String id);
+
+    @PUT("payments/{id}/fail")
+    Call<Payment> failPayment(@Path("id") String id);
 
     @GET("payments/booking/{bookingId}")
     Call<Payment> getPaymentByBookingId(@Path("bookingId") String bookingId);
@@ -102,10 +135,28 @@ public interface ApiService {
     @GET("review")
     Call<List<Review>> getMyReviews();
 
+    @GET("review/{id}")
+    Call<Review> getReviewById(@Path("id") String id);
+
     @POST("review")
     Call<StatusResponse> createReview(@Body CreateReviewRequest body);
 
+    @PUT("review/{id}")
+    Call<StatusResponse> updateReview(@Path("id") String id, @Body UpdateReviewRequest body);
+
     @DELETE("review/{id}")
     Call<StatusResponse> deleteReview(@Path("id") String id);
-}
 
+    // ===== CHAT =====
+    @POST("chats/get-or-create")
+    Call<ChatRoom> getOrCreateChat(@Query("guideId") String guideId);
+
+    @GET("chats/{chatId}/messages")
+    Call<List<ChatMessage>> getChatMessages(@Path("chatId") String chatId);
+
+    @POST("chats/send")
+    Call<ChatMessage> sendMessage(@Body SendMessageRequest body);
+
+    @GET("chats/my-chats")
+    Call<List<ChatRoom>> getMyChats();
+}

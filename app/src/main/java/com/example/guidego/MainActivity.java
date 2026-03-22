@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 import com.example.guidego.databinding.ActivityMainBinding;
 import com.example.guidego.ui.booking.BookingFragment;
 import com.example.guidego.ui.cart.CartFragment;
+import com.example.guidego.ui.chat.ChatListFragment;
 import com.example.guidego.ui.home.HomeFragment;
 import com.example.guidego.ui.profile.ProfileFragment;
 import com.example.guidego.ui.search.SearchFragment;
@@ -19,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     private SearchFragment searchFragment;
     private CartFragment cartFragment;
     private BookingFragment bookingFragment;
+    private ChatListFragment chatListFragment;
     private ProfileFragment profileFragment;
     private Fragment activeFragment;
 
@@ -29,6 +31,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         initFragments();
         setupBottomNav();
+
+        // Handle navigate_to extras (e.g. after VNPay success)
+        String navigateTo = getIntent().getStringExtra("navigate_to");
+        if ("bookings".equals(navigateTo)) {
+            binding.bottomNav.setSelectedItemId(R.id.nav_bookings);
+        }
     }
 
     private void initFragments() {
@@ -36,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
         searchFragment = new SearchFragment();
         cartFragment = new CartFragment();
         bookingFragment = new BookingFragment();
+        chatListFragment = new ChatListFragment();
         profileFragment = new ProfileFragment();
 
         getSupportFragmentManager().beginTransaction()
@@ -43,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
                 .add(R.id.fragment_container, searchFragment, "search").hide(searchFragment)
                 .add(R.id.fragment_container, cartFragment, "cart").hide(cartFragment)
                 .add(R.id.fragment_container, bookingFragment, "booking").hide(bookingFragment)
+                .add(R.id.fragment_container, chatListFragment, "chat").hide(chatListFragment)
                 .add(R.id.fragment_container, profileFragment, "profile").hide(profileFragment)
                 .commit();
         activeFragment = homeFragment;
@@ -56,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
             else if (id == R.id.nav_search) selected = searchFragment;
             else if (id == R.id.nav_cart) selected = cartFragment;
             else if (id == R.id.nav_bookings) selected = bookingFragment;
+            else if (id == R.id.nav_chat) selected = chatListFragment;
             else if (id == R.id.nav_profile) selected = profileFragment;
 
             if (selected != null && selected != activeFragment) {
@@ -70,4 +81,5 @@ public class MainActivity extends AppCompatActivity {
     public void navigateToCart() { binding.bottomNav.setSelectedItemId(R.id.nav_cart); }
     public void navigateToBookings() { binding.bottomNav.setSelectedItemId(R.id.nav_bookings); }
     public void navigateToSearch() { binding.bottomNav.setSelectedItemId(R.id.nav_search); }
+    public void navigateToChat() { binding.bottomNav.setSelectedItemId(R.id.nav_chat); }
 }

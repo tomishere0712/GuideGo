@@ -82,5 +82,16 @@ public class ApiClient {
     public ApiService getApiService() {
         return apiService;
     }
+
+    public String getHubUrl() {
+        String baseUrl = BuildConfig.BASE_URL;
+        // BASE_URL = "http://10.0.2.2:5157/api/"
+        // Hub URL  = "http://10.0.2.2:5157/chatHub"
+        int apiIndex = baseUrl.indexOf("/api");
+        if (apiIndex > 0) {
+            return baseUrl.substring(0, apiIndex) + "/chatHub";
+        }
+        return baseUrl + "chatHub";
+    }
 }
 
