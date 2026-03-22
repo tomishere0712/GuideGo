@@ -8,28 +8,30 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.guidego.MainActivity;
 import com.example.guidego.R;
 import com.example.guidego.api.ApiClient;
 import com.example.guidego.databinding.ActivityPaymentBinding;
 import com.example.guidego.model.Booking;
-import com.example.guidego.model.Payment;
-import com.example.guidego.model.request.CreatePaymentRequest;
+import com.example.guidego.model.request.VnPayRequest;
+import com.example.guidego.model.response.VnPayResponse;
 import com.example.guidego.utils.Constants;
 import com.example.guidego.utils.FormatUtils;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -41,6 +43,14 @@ public class PaymentActivity extends AppCompatActivity {
     private List<Booking> bookings = new ArrayList<>();
     private double totalAmount;
 
+    private final ActivityResultLauncher<Intent> vnPayLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    setResult(RESULT_OK);
+                    finish();
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,7 +59,6 @@ public class PaymentActivity extends AppCompatActivity {
 
         binding.btnBack.setOnClickListener(v -> finish());
 
-        // Parse bookings from intent
         String bookingsJson = getIntent().getStringExtra(Constants.EXTRA_BOOKING_IDS);
         totalAmount = getIntent().getDoubleExtra(Constants.EXTRA_TOTAL_AMOUNT, 0);
 
@@ -60,7 +69,7 @@ public class PaymentActivity extends AppCompatActivity {
 
         setupBookingSummary();
         binding.tvTotalAmount.setText(FormatUtils.formatVND(totalAmount));
-        binding.btnPay.setOnClickListener(v -> processPayment());
+        binding.btnPay.setOnClickListener(v -> processVnPayPayment());
     }
 
     private void setupBookingSummary() {
@@ -69,121 +78,68 @@ public class PaymentActivity extends AppCompatActivity {
         binding.rvBookingSummary.setAdapter(summaryAdapter);
     }
 
-    private String getSelectedPaymentMethod() {
-        int id = binding.rgPaymentMethod.getCheckedRadioButtonId();
-        if (id == R.id.rb_bank_transfer) return Payment.METHOD_BANK_TRANSFER;
-        if (id == R.id.rb_credit_card) return Payment.METHOD_CREDIT_CARD;
-        return Payment.METHOD_CASH;
-    }
-
-    private void processPayment() {
+    private void processVnPayPayment() {
         if (bookings.isEmpty()) return;
         binding.btnPay.setEnabled(false);
         binding.progressBar.setVisibility(View.VISIBLE);
 
-        String method = getSelectedPaymentMethod();
-        AtomicInteger completed = new AtomicInteger(0);
-        AtomicInteger failed = new AtomicInteger(0);
-        int total = bookings.size();
+        List<String> bookingIds = bookings.stream()
+                .map(Booking::getId)
+                .collect(Collectors.toList());
 
-        for (Booking booking : bookings) {
-            ApiClient.getInstance(this).getApiService()
-                    .createPayment(new CreatePaymentRequest(booking.getId(), method))
-                    .enqueue(new Callback<Payment>() {
-                        @Override
-                        public void onResponse(@NonNull Call<Payment> call, @NonNull Response<Payment> response) {
-                            if (response.isSuccessful() && response.body() != null) {
-                                String paymentId = response.body().getId();
-                                confirmPayment(paymentId, completed, failed, total);
-                            } else {
-                                failed.incrementAndGet();
-                                checkAllDone(completed, failed, total);
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<Payment> call, @NonNull Throwable t) {
-                            failed.incrementAndGet();
-                            checkAllDone(completed, failed, total);
-                        }
-                    });
-        }
-    }
-
-    private void confirmPayment(String paymentId, AtomicInteger completed, AtomicInteger failed, int total) {
         ApiClient.getInstance(this).getApiService()
-                .confirmPayment(paymentId)
-                .enqueue(new Callback<Payment>() {
+                .createVnPayUrl(new VnPayRequest(bookingIds))
+                .enqueue(new Callback<VnPayResponse>() {
                     @Override
-                    public void onResponse(@NonNull Call<Payment> call, @NonNull Response<Payment> response) {
-                        if (response.isSuccessful()) {
-                            completed.incrementAndGet();
+                    public void onResponse(@NonNull Call<VnPayResponse> call,
+                                           @NonNull Response<VnPayResponse> response) {
+                        binding.progressBar.setVisibility(View.GONE);
+                        binding.btnPay.setEnabled(true);
+                        if (response.isSuccessful() && response.body() != null
+                                && response.body().getPaymentUrl() != null) {
+                            openVnPayWebView(response.body().getPaymentUrl());
                         } else {
-                            failed.incrementAndGet();
+                            String errorMsg = "Không thể tạo link thanh toán. Vui lòng thử lại.";
+                            try {
+                                if (response.errorBody() != null) {
+                                    String errorBodyStr = response.errorBody().string();
+                                    JsonObject json = JsonParser.parseString(errorBodyStr).getAsJsonObject();
+                                    if (json.has("message")) {
+                                        errorMsg = json.get("message").getAsString();
+                                    }
+                                }
+                            } catch (Exception ignored) {}
+                            Toast.makeText(PaymentActivity.this, errorMsg, Toast.LENGTH_LONG).show();
                         }
-                        checkAllDone(completed, failed, total);
                     }
 
                     @Override
-                    public void onFailure(@NonNull Call<Payment> call, @NonNull Throwable t) {
-                        failed.incrementAndGet();
-                        checkAllDone(completed, failed, total);
+                    public void onFailure(@NonNull Call<VnPayResponse> call, @NonNull Throwable t) {
+                        binding.progressBar.setVisibility(View.GONE);
+                        binding.btnPay.setEnabled(true);
+                        Toast.makeText(PaymentActivity.this, "Lỗi kết nối", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-    private void checkAllDone(AtomicInteger completed, AtomicInteger failed, int total) {
-        if (completed.get() + failed.get() >= total) {
-            runOnUiThread(() -> {
-                binding.progressBar.setVisibility(View.GONE);
-                binding.btnPay.setEnabled(true);
-                if (failed.get() == 0) {
-                    showSuccessDialog();
-                } else if (completed.get() > 0) {
-                    Toast.makeText(this, "Một số đơn thanh toán thành công", Toast.LENGTH_LONG).show();
-                    goToBookings();
-                } else {
-                    Toast.makeText(this, "Thanh toán thất bại. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-    }
-
-    private void showSuccessDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("✅ " + getString(R.string.payment_success))
-                .setMessage(getString(R.string.payment_success_desc))
-                .setPositiveButton(getString(R.string.back_to_home), (d, w) -> goToHome())
-                .setCancelable(false)
-                .show();
-    }
-
-    private void goToHome() {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        finish();
-    }
-
-    private void goToBookings() {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        finish();
+    private void openVnPayWebView(String paymentUrl) {
+        Intent intent = new Intent(this, VnPayActivity.class);
+        intent.putExtra(Constants.EXTRA_VNPAY_URL, paymentUrl);
+        intent.putExtra(Constants.EXTRA_TOTAL_AMOUNT, totalAmount);
+        vnPayLauncher.launch(intent);
     }
 
     // Inner adapter for booking summary
     static class BookingSummaryAdapter extends RecyclerView.Adapter<BookingSummaryAdapter.ViewHolder> {
         private final List<Booking> bookings;
 
-        BookingSummaryAdapter(List<Booking> bookings) {
-            this.bookings = bookings;
-        }
+        BookingSummaryAdapter(List<Booking> bookings) { this.bookings = bookings; }
 
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_booking_summary, parent, false);
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_booking_summary, parent, false);
             return new ViewHolder(v);
         }
 

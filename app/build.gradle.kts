@@ -77,6 +77,9 @@ dependencies {
     // Image Loading
     implementation(libs.glide)
 
+    // SignalR (Real-time Chat)
+    implementation("com.microsoft.signalr:signalr:8.0.0")
+
     // UI
     implementation(libs.circleimageview)
     implementation(libs.play.services.maps)

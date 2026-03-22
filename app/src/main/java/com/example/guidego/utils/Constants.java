@@ -13,6 +13,11 @@ public class Constants {
     public static final String EXTRA_BOOKING_IDS = "booking_ids";
     public static final String EXTRA_TOTAL_AMOUNT = "total_amount";
     public static final String EXTRA_CITY = "city";
+    public static final String EXTRA_VNPAY_URL = "vnpay_url";
+    public static final String EXTRA_CHAT_ID = "chat_id";
+    public static final String EXTRA_CHAT_NAME = "chat_name";
+    public static final String EXTRA_GUIDE_ID = "guide_id";
+    public static final String EXTRA_GUIDE_NAME = "guide_name";
 
     public static final String ROLE_TOURIST = "Tourist";
     public static final String ROLE_GUIDE = "Guide";
