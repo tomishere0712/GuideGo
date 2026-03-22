@@ -13,6 +13,9 @@ import com.example.guidego.api.ApiClient;
 import com.example.guidego.databinding.ActivityLoginBinding;
 import com.example.guidego.model.request.LoginRequest;
 import com.example.guidego.model.response.LoginResponse;
+import com.example.guidego.ui.admin.AdminMainActivity;
+import com.example.guidego.ui.guide.GuideMainActivity;
+import com.example.guidego.utils.Constants;
 import com.example.guidego.utils.TokenManager;
 
 import retrofit2.Call;
@@ -53,8 +56,21 @@ public class LoginActivity extends AppCompatActivity {
                     public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                         setLoading(false);
                         if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                            // saveToken decodes JWT and stores role, userId, email, name
                             tokenManager.saveToken(response.body().getToken());
-                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+
+                            // Route to correct main activity based on role
+                            String role = tokenManager.getUserRole();
+                            Intent intent;
+                            if (Constants.ROLE_ADMIN.equals(role)) {
+                                intent = new Intent(LoginActivity.this, AdminMainActivity.class);
+                            } else if (Constants.ROLE_GUIDE.equals(role)) {
+                                intent = new Intent(LoginActivity.this, GuideMainActivity.class);
+                            } else {
+                                intent = new Intent(LoginActivity.this, MainActivity.class);
+                            }
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
                             finish();
                         } else {
                             Toast.makeText(LoginActivity.this, "Email hoặc mật khẩu không đúng", Toast.LENGTH_SHORT).show();
@@ -74,4 +90,6 @@ public class LoginActivity extends AppCompatActivity {
         binding.btnLogin.setEnabled(!loading);
     }
 }
+
+
 

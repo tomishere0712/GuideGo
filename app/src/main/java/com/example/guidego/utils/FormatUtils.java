@@ -19,6 +19,11 @@ public class FormatUtils {
         return VND_FORMAT.format(amount) + " ₫";
     }
 
+    /** Alias for formatVND — used by tour/booking adapters. */
+    public static String formatCurrency(double amount) {
+        return formatVND(amount);
+    }
+
     public static String formatDate(String isoDate) {
         if (isoDate == null || isoDate.isEmpty()) return "";
         try {

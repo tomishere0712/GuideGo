@@ -1,10 +1,8 @@
-package com.example.guidego.model;
+package com.example.guidego.model.request;
 
 import com.google.gson.annotations.SerializedName;
 
-public class TourSchedule {
-    @SerializedName("id")
-    private String id;
+public class CreateScheduleRequest {
     @SerializedName("tour_id")
     private String tourId;
     @SerializedName("start_date")
@@ -13,11 +11,14 @@ public class TourSchedule {
     private String endDate;
     @SerializedName("available_slots")
     private int availableSlots;
-    @SerializedName("created_at")
-    private String createdAt;
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public CreateScheduleRequest(String tourId, String startDate, String endDate, int availableSlots) {
+        this.tourId = tourId;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.availableSlots = availableSlots;
+    }
+
     public String getTourId() { return tourId; }
     public void setTourId(String tourId) { this.tourId = tourId; }
     public String getStartDate() { return startDate; }
@@ -26,11 +27,5 @@ public class TourSchedule {
     public void setEndDate(String endDate) { this.endDate = endDate; }
     public int getAvailableSlots() { return availableSlots; }
     public void setAvailableSlots(int availableSlots) { this.availableSlots = availableSlots; }
-    public String getCreatedAt() { return createdAt; }
-    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
-
-    @Override
-    public String toString() {
-        return startDate + " → " + endDate + " (" + availableSlots + " chỗ)";
-    }
 }
+
