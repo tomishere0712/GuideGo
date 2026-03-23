@@ -46,9 +46,22 @@ public class Tour {
     private double latitude;
     @SerializedName("longitude")
     private double longitude;
+    @SerializedName("image_url")
+    private String imageUrl;
+    @SerializedName("image_urls")
+    private List<String> imageUrls;
 
-    // Helper: get image URL from picsum based on tour id seed
+    // Helper: get image URL from backend or picsum
     public String getImageUrl() {
+        // Priority 1: Use first URL from image_urls array
+        if (imageUrls != null && !imageUrls.isEmpty()) {
+            return imageUrls.get(0);
+        }
+        // Priority 2: Use single image_url field
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            return imageUrl;
+        }
+        // Fallback: generate placeholder from picsum
         String seed = (id != null && id.length() >= 8) ? id.substring(0, 8) : "default";
         return "https://picsum.photos/seed/" + seed + "/800/500";
     }
@@ -107,4 +120,9 @@ public class Tour {
     public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
+
+    public String getImageUrlField() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public List<String> getImageUrls() { return imageUrls; }
+    public void setImageUrls(List<String> imageUrls) { this.imageUrls = imageUrls; }
 }

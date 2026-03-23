@@ -13,6 +13,9 @@ public class Guide {
     @SerializedName(value = "experience_years", alternate = {"experienceYears"})
     private int experienceYears;
 
+    @SerializedName(value = "full_name", alternate = {"fullName"})
+    private String fullName;
+
     @SerializedName("languages")
     private List<String> languages;
 
@@ -34,6 +37,8 @@ public class Guide {
     public void setUserId(String userId) { this.userId = userId; }
     public int getExperienceYears() { return experienceYears; }
     public void setExperienceYears(int experienceYears) { this.experienceYears = experienceYears; }
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
     public List<String> getLanguages() { return languages; }
     public void setLanguages(List<String> languages) { this.languages = languages; }
     public String getDescription() { return description; }

@@ -202,6 +202,17 @@
                 android:background="@color/colorSurfaceVariant"
                 android:visibility="gone" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRemoveImage"
+                style="@style/ButtonOutline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="🗑️  Xóa ảnh"
+                android:textColor="@color/colorError"
+                app:strokeColor="@color/colorError"
+                android:visibility="gone" />
+
             <!-- Save Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSave"

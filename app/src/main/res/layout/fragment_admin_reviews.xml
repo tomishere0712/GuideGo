@@ -61,13 +61,22 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:orientation="vertical"
+                android:padding="32dp"
                 android:visibility="gone">
 
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="⭐" android:textSize="52sp" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp" android:text="Chưa có đánh giá nào"
-                    android:textColor="@color/colorTextSecondary" android:textSize="16sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⭐"
+                    android:textSize="52sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Chưa có đánh giá nào"
+                    android:textColor="@color/colorTextSecondary"
+                    android:textSize="16sp" />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView

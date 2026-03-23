@@ -1,9 +1,11 @@
 package com.example.guidego.ui.admin;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.guidego.databinding.ItemGuideTourBinding;
@@ -61,13 +63,22 @@ public class AdminTourAdapter extends RecyclerView.Adapter<AdminTourAdapter.View
         }
 
         void bind(Tour tour) {
+            Context ctx = b.getRoot().getContext();
             b.tvTitle.setText(tour.getTitle());
             String loc = tour.getLocationName() != null ? tour.getLocationName() : tour.getCity();
             b.tvLocation.setText(loc != null ? loc : "—");
             b.tvPrice.setText(FormatUtils.formatCurrency(tour.getPricePerPerson()));
             b.tvDuration.setText(tour.getDurationDays() + " ngày");
             b.tvMaxPeople.setText(String.valueOf(tour.getMaxPeople()));
-            b.tvStatus.setText(tour.isActive() ? "Hoạt động" : "Ẩn");
+            
+            // Status with color coding
+            if (tour.isActive()) {
+                b.tvStatus.setText("Hoạt động");
+                b.tvStatus.setBackgroundColor(ContextCompat.getColor(ctx, com.example.guidego.R.color.colorSuccess));
+            } else {
+                b.tvStatus.setText("Ẩn");
+                b.tvStatus.setBackgroundColor(ContextCompat.getColor(ctx, com.example.guidego.R.color.colorError));
+            }
 
             // Show guide name if available
             String guideLabel = tour.getGuideName() != null ? "HDV: " + tour.getGuideName() : "";

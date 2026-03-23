@@ -52,9 +52,22 @@ public class CreateEditTourActivity extends AppCompatActivity {
     private final ActivityResultLauncher<Intent> imagePickerLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    selectedImageUri = result.getData().getData();
-                    binding.ivPreview.setVisibility(View.VISIBLE);
-                    Glide.with(this).load(selectedImageUri).into(binding.ivPreview);
+                    Uri uri = result.getData().getData();
+                    if (uri != null) {
+                        selectedImageUri = uri;
+                        binding.ivPreview.setVisibility(View.VISIBLE);
+                        binding.btnRemoveImage.setVisibility(View.VISIBLE);
+                        try {
+                            Glide.with(this).load(selectedImageUri).into(binding.ivPreview);
+                        } catch (Exception e) {
+                            Toast.makeText(this, "Không thể tải ảnh", Toast.LENGTH_SHORT).show();
+                            selectedImageUri = null;
+                            binding.ivPreview.setVisibility(View.GONE);
+                            binding.btnRemoveImage.setVisibility(View.GONE);
+                        }
+                    } else {
+                        Toast.makeText(this, "Không thể chọn ảnh", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
 
@@ -70,6 +83,7 @@ public class CreateEditTourActivity extends AppCompatActivity {
 
         binding.btnBack.setOnClickListener(v -> finish());
         binding.btnPickImage.setOnClickListener(v -> pickImage());
+        binding.btnRemoveImage.setOnClickListener(v -> removeImage());
         binding.btnSave.setOnClickListener(v -> saveTour());
 
         if (isAdminMode) {
@@ -126,7 +140,11 @@ public class CreateEditTourActivity extends AppCompatActivity {
                             List<String> names = new ArrayList<>();
                             names.add("-- Chọn hướng dẫn viên --");
                             for (Guide g : guides) {
-                                String name = g.getUser() != null ? g.getUser().getFullName() : g.getUserId();
+                                String name = g.getFullName() != null && !g.getFullName().isEmpty() 
+                                        ? g.getFullName() 
+                                        : (g.getUser() != null && g.getUser().getFullName() != null 
+                                                ? g.getUser().getFullName() 
+                                                : g.getUserId());
                                 names.add(name);
                             }
                             ArrayAdapter<String> adapter = new ArrayAdapter<>(
@@ -177,6 +195,12 @@ public class CreateEditTourActivity extends AppCompatActivity {
     private void pickImage() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         imagePickerLauncher.launch(intent);
+    }
+
+    private void removeImage() {
+        selectedImageUri = null;
+        binding.ivPreview.setVisibility(View.GONE);
+        binding.btnRemoveImage.setVisibility(View.GONE);
     }
 
     private void saveTour() {
