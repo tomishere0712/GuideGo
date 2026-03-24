@@ -184,9 +184,10 @@ public class ManageSchedulesActivity extends AppCompatActivity {
                 });
     }
 
-    private void updateSchedule(String id, String startDate, String endDate, int slots) {
+    private void updateSchedule(String scheduleId, String startDate, String endDate, int slots) {
         UpdateScheduleRequest request = new UpdateScheduleRequest(startDate, endDate, slots);
-        ApiClient.getInstance(this).getApiService().updateTourSchedule(id, request)
+        ApiClient.getInstance(this).getApiService()
+                .updateTourSchedule(tourId, scheduleId, request)
                 .enqueue(new Callback<StatusResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<StatusResponse> call,

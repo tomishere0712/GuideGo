@@ -3,6 +3,10 @@ package com.example.guidego.model.request;
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
+/**
+ * Field names phải khớp với .NET DTO property names (camelCase).
+ * CreateGuideDto: UserId, ExperienceYears, Languages, Description
+ */
 public class RegisterGuideRequest {
     @SerializedName("user_id")
     private String userId;
@@ -29,4 +33,3 @@ public class RegisterGuideRequest {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 }
-

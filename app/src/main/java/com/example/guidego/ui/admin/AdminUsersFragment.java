@@ -23,6 +23,7 @@ import com.example.guidego.model.request.CreateUserRequest;
 import com.example.guidego.model.request.UpdateProfileRequest;
 import com.example.guidego.model.response.StatusResponse;
 import com.example.guidego.utils.Constants;
+import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +34,12 @@ import retrofit2.Response;
 
 public class AdminUsersFragment extends Fragment {
 
+    private static final String[] ROLE_TABS = {"Tất cả", "Admin", "Guide", "Tourist"};
+
     private FragmentAdminUsersBinding binding;
     private AdminUserAdapter adapter;
     private List<User> allUsers = new ArrayList<>();
+    private String selectedRole = null; // null = all
 
     @Nullable
     @Override
@@ -67,6 +71,22 @@ public class AdminUsersFragment extends Fragment {
             @Override public void afterTextChanged(Editable s) {}
         });
 
+        // Add role filter tabs
+        for (String label : ROLE_TABS) {
+            binding.tabRoleFilter.addTab(binding.tabRoleFilter.newTab().setText(label));
+        }
+
+        binding.tabRoleFilter.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override public void onTabSelected(TabLayout.Tab tab) {
+                int pos = tab.getPosition();
+                selectedRole = pos == 0 ? null : ROLE_TABS[pos];
+                String q = binding.etSearch.getText() != null ? binding.etSearch.getText().toString() : "";
+                filterUsers(q);
+            }
+            @Override public void onTabUnselected(TabLayout.Tab tab) {}
+            @Override public void onTabReselected(TabLayout.Tab tab) {}
+        });
+
         loadUsers();
     }
 
@@ -89,14 +109,9 @@ public class AdminUsersFragment extends Fragment {
                         binding.swipeRefresh.setRefreshing(false);
                         if (response.isSuccessful() && response.body() != null) {
                             allUsers = response.body();
-                            if (allUsers.isEmpty()) {
-                                binding.layoutEmpty.setVisibility(View.VISIBLE);
-                                binding.recyclerView.setVisibility(View.GONE);
-                            } else {
-                                binding.layoutEmpty.setVisibility(View.GONE);
-                                binding.recyclerView.setVisibility(View.VISIBLE);
-                                adapter.setUsers(allUsers);
-                            }
+                            String query = binding.etSearch.getText() != null
+                                    ? binding.etSearch.getText().toString() : "";
+                            filterUsers(query);
                         } else {
                             Toast.makeText(requireContext(), "Không tải được danh sách", Toast.LENGTH_SHORT).show();
                         }
@@ -113,19 +128,21 @@ public class AdminUsersFragment extends Fragment {
     }
 
     private void filterUsers(String query) {
-        if (query.isEmpty()) {
-            adapter.setUsers(allUsers);
-            return;
-        }
         List<User> filtered = new ArrayList<>();
-        String q = query.toLowerCase();
+        String q = query.toLowerCase().trim();
         for (User u : allUsers) {
-            if ((u.getFullName() != null && u.getFullName().toLowerCase().contains(q))
-                    || (u.getEmail() != null && u.getEmail().toLowerCase().contains(q))) {
+            boolean matchesSearch = q.isEmpty()
+                    || (u.getFullName() != null && u.getFullName().toLowerCase().contains(q))
+                    || (u.getEmail() != null && u.getEmail().toLowerCase().contains(q));
+            boolean matchesRole = selectedRole == null
+                    || selectedRole.equalsIgnoreCase(u.getRole());
+            if (matchesSearch && matchesRole) {
                 filtered.add(u);
             }
         }
         adapter.setUsers(filtered);
+        binding.layoutEmpty.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
+        binding.recyclerView.setVisibility(filtered.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
     private void showUserDialog(User existing) {
@@ -264,4 +281,3 @@ public class AdminUsersFragment extends Fragment {
                 .show();
     }
 }
-

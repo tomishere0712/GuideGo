@@ -27,10 +27,15 @@ import com.example.guidego.model.request.SendMessageRequest;
 import com.example.guidego.model.request.UpdateGuideRequest;
 import com.example.guidego.model.request.UpdateProfileRequest;
 import com.example.guidego.model.request.UpdateReviewRequest;
+import com.example.guidego.model.SuitableGuide;
+import com.example.guidego.model.request.AssignGuideRequest;
+import com.example.guidego.model.request.CreateTourRequestRequest;
+import com.example.guidego.model.request.GuideDecisionRequest;
 import com.example.guidego.model.request.UpdateScheduleRequest;
 import com.example.guidego.model.request.VnPayRequest;
 import com.example.guidego.model.response.CreateDataResponse;
 import com.example.guidego.model.response.GuidesResponse;
+import com.example.guidego.model.response.SingleGuideResponse;
 import com.example.guidego.model.response.LocationResponse;
 import com.example.guidego.model.response.LoginResponse;
 import com.example.guidego.model.response.StatusResponse;
@@ -46,6 +51,7 @@ import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Multipart;
+import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Part;
@@ -82,6 +88,10 @@ public interface ApiService {
     @GET("tour")
     Call<List<Tour>> getAllTours();
 
+    /** Guide-only: returns all tours where guide_id = current guide (regular + custom requests) */
+    @GET("tour/guide-requests")
+    Call<List<Tour>> getGuideRequests();
+
     @GET("tour/search")
     Call<TourSearchResponse> searchTours(@QueryMap Map<String, Object> params);
 
@@ -101,6 +111,26 @@ public interface ApiService {
     @POST("tour/{id}/images")
     Call<CreateDataResponse> uploadTourImage(@Path("id") String tourId, @Part MultipartBody.Part file);
 
+    // ===== TOUR REQUESTS (new flow) =====
+    @GET("tour/suitable-guides")
+    Call<List<SuitableGuide>> getSuitableGuides(
+            @Query("location_id") String locationId,
+            @Query("language") String language,
+            @Query("verified_only") Boolean verifiedOnly,
+            @Query("limit") Integer limit);
+
+    @POST("tour/requests")
+    Call<CreateDataResponse> createTourRequest(@Body CreateTourRequestRequest body);
+
+    @GET("tour/my-requests")
+    Call<List<Tour>> getMyTourRequests();
+
+    @POST("tour/{tourId}/assign-guide")
+    Call<StatusResponse> assignGuide(@Path("tourId") String tourId, @Body AssignGuideRequest body);
+
+    @POST("tour/{tourId}/guide-decision")
+    Call<StatusResponse> guideDecision(@Path("tourId") String tourId, @Body GuideDecisionRequest body);
+
     // ===== TOUR SCHEDULES =====
     @GET("tour-schedules/tour/{tourId}")
     Call<List<TourSchedule>> getTourSchedules(@Path("tourId") String tourId);
@@ -108,11 +138,13 @@ public interface ApiService {
     @GET("tour-schedules/{id}")
     Call<TourSchedule> getTourScheduleById(@Path("id") String id);
 
-    @POST("tour-schedules")
+    @POST("tour/schedules")
     Call<CreateDataResponse> createTourSchedule(@Body CreateScheduleRequest body);
 
-    @PUT("tour-schedules/{id}")
-    Call<StatusResponse> updateTourSchedule(@Path("id") String id, @Body UpdateScheduleRequest body);
+    @PUT("tour/{tourId}/schedules/{scheduleId}")
+    Call<StatusResponse> updateTourSchedule(@Path("tourId") String tourId,
+                                             @Path("scheduleId") String scheduleId,
+                                             @Body UpdateScheduleRequest body);
 
     @DELETE("tour-schedules/{id}")
     Call<StatusResponse> deleteTourSchedule(@Path("id") String id);
@@ -122,10 +154,10 @@ public interface ApiService {
     Call<GuidesResponse> getAllGuides();
 
     @GET("guides/{id}")
-    Call<GuidesResponse> getGuideById(@Path("id") String id);
+    Call<SingleGuideResponse> getGuideById(@Path("id") String id);
 
     @GET("guides/user/{userId}")
-    Call<GuidesResponse> getGuideByUserId(@Path("userId") String userId);
+    Call<SingleGuideResponse> getGuideByUserId(@Path("userId") String userId);
 
     @POST("guides")
     Call<CreateDataResponse> registerGuide(@Body RegisterGuideRequest body);
@@ -175,8 +207,16 @@ public interface ApiService {
     @GET("bookings/{id}")
     Call<Booking> getBookingById(@Path("id") String id);
 
+    /** Guide/Admin: get all bookings for a specific tour */
+    @GET("bookings")
+    Call<List<Booking>> getBookingsByTour(@Query("tourId") String tourId);
+
     @PUT("bookings/{id}/cancel")
     Call<StatusResponse> cancelBooking(@Path("id") String id);
+
+    /** Guide (assigned) / Admin: mark booking as Completed after tour ends */
+    @PATCH("bookings/{id}/complete")
+    Call<StatusResponse> completeBooking(@Path("id") String id);
 
     // ===== PAYMENT - VNPay =====
     @POST("payments/vnpay/create-url")
@@ -198,7 +238,20 @@ public interface ApiService {
     Call<Payment> getPaymentByBookingId(@Path("bookingId") String bookingId);
 
     // ===== REVIEW =====
+    /** Public: get all reviews (no filter) */
     @GET("review")
+    Call<List<Review>> getAllReviews();
+
+    /** Public: get reviews for a specific tour */
+    @GET("review")
+    Call<List<Review>> getReviewsByTour(@Query("tour_id") String tourId);
+
+    /** Public: get reviews for a specific guide */
+    @GET("review")
+    Call<List<Review>> getReviewsByGuide(@Query("guide_id") String guideId);
+
+    /** Tourist: get reviews written by the authenticated tourist */
+    @GET("review/my-reviews")
     Call<List<Review>> getMyReviews();
 
     @GET("review/{id}")

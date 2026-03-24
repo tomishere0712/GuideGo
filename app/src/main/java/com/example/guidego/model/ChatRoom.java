@@ -5,19 +5,19 @@ import com.google.gson.annotations.SerializedName;
 public class ChatRoom {
     @SerializedName("id")
     private String id;
-    @SerializedName("touristId")
+    @SerializedName(value = "touristId", alternate = {"tourist_id", "userId", "user_id"})
     private String touristId;
-    @SerializedName("guideId")
+    @SerializedName(value = "guideId", alternate = {"guide_id"})
     private String guideId;
-    @SerializedName("guideName")
+    @SerializedName(value = "guideName", alternate = {"guide_name"})
     private String guideName;
-    @SerializedName("touristName")
+    @SerializedName(value = "touristName", alternate = {"tourist_name", "userName", "user_name"})
     private String touristName;
-    @SerializedName("lastMessage")
+    @SerializedName(value = "lastMessage", alternate = {"last_message"})
     private String lastMessage;
-    @SerializedName("lastMessageAt")
+    @SerializedName(value = "lastMessageAt", alternate = {"last_message_at"})
     private String lastMessageAt;
-    @SerializedName("createdAt")
+    @SerializedName(value = "createdAt", alternate = {"created_at"})
     private String createdAt;
 
     public String getId() { return id; }

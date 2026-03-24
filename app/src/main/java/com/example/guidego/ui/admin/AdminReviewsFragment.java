@@ -59,7 +59,7 @@ public class AdminReviewsFragment extends Fragment {
     private void loadReviews() {
         binding.progressBar.setVisibility(View.VISIBLE);
         ApiClient.getInstance(requireContext()).getApiService()
-                .getMyReviews()
+                .getAllReviews()
                 .enqueue(new Callback<List<Review>>() {
                     @Override
                     public void onResponse(@NonNull Call<List<Review>> call,

@@ -106,19 +106,66 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Cancel Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_cancel"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
+        <!-- Action Buttons Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:paddingHorizontal="16dp"
-            android:text="@string/cancel_booking"
-            android:textSize="12sp"
-            app:strokeColor="@color/colorError"
-            android:textColor="@color/colorError"
-            android:visibility="gone" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_cancel"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:paddingHorizontal="16dp"
+                android:text="@string/cancel_booking"
+                android:textSize="12sp"
+                app:strokeColor="@color/colorError"
+                android:textColor="@color/colorError"
+                android:visibility="gone" />
+
+            <!-- "Viết đánh giá" — shown when reviewable and not yet reviewed -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_write_review"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginStart="8dp"
+                android:paddingHorizontal="16dp"
+                android:text="@string/write_review"
+                android:textSize="12sp"
+                app:strokeColor="@color/colorSuccess"
+                android:textColor="@color/colorSuccess"
+                android:visibility="gone" />
+
+            <!-- "✓ Đã đánh giá" label — shown when already reviewed -->
+            <TextView
+                android:id="@+id/tv_reviewed_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="✓ Đã đánh giá"
+                android:textColor="@color/colorSuccess"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <!-- "Sửa" — shown when already reviewed -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_edit_review"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginStart="8dp"
+                android:paddingHorizontal="14dp"
+                android:text="Sửa"
+                android:textSize="12sp"
+                app:strokeColor="@color/colorPrimary"
+                android:textColor="@color/colorPrimary"
+                android:visibility="gone" />
+        </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
 

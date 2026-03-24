@@ -54,16 +54,21 @@ public class AdminReviewAdapter extends RecyclerView.Adapter<AdminReviewAdapter.
 
         void bind(Review review) {
             int rating = review.getRating();
-            // Build star string safely (String.repeat() needs API 33+)
             StringBuilder stars = new StringBuilder();
             for (int i = 0; i < Math.min(rating, 5); i++) stars.append("⭐");
             b.tvRating.setText(rating + " / 5  " + stars.toString());
             b.tvComment.setText(review.getComment() != null && !review.getComment().isEmpty()
                     ? review.getComment() : "(Không có bình luận)");
 
-            String meta = "Tour: " + (review.getTourId() != null
-                    ? review.getTourId().substring(0, Math.min(8, review.getTourId().length())) + "..."
-                    : "—");
+            // Use tour_title and full_name from ReviewResponseDto
+            String tourDisplay = review.getTourTitle() != null && !review.getTourTitle().isEmpty()
+                    ? review.getTourTitle()
+                    : (review.getTourId() != null
+                        ? review.getTourId().substring(0, Math.min(8, review.getTourId().length())) + "..."
+                        : "—");
+            String userDisplay = review.getFullName() != null && !review.getFullName().isEmpty()
+                    ? review.getFullName() : "—";
+            String meta = "Tour: " + tourDisplay + "  •  " + userDisplay;
             if (review.getCreatedAt() != null && review.getCreatedAt().length() >= 10) {
                 meta += "  •  " + review.getCreatedAt().substring(0, 10);
             }

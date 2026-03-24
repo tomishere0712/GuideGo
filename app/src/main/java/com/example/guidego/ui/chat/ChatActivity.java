@@ -100,6 +100,8 @@ public class ChatActivity extends AppCompatActivity {
         hubConnection.on("ReceiveMessage", message -> {
             if (chatId.equals(message.getChatId())) {
                 runOnUiThread(() -> {
+                    // addMessage is dedup-safe: if HTTP response already added this message
+                    // (same id), it will be skipped automatically.
                     messageAdapter.addMessage(message);
                     scrollToBottom();
                 });

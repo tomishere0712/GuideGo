@@ -50,6 +50,13 @@ public class Tour {
     private String imageUrl;
     @SerializedName("image_urls")
     private List<String> imageUrls;
+    // Custom tour request fields
+    @SerializedName("is_custom_request")
+    private boolean isCustomRequest;
+    @SerializedName("requested_by_user_id")
+    private String requestedByUserId;
+    @SerializedName("guide_request_status")
+    private String guideRequestStatus; // "Pending" | "Accepted" | "Rejected"
 
     // Helper: get image URL from backend or picsum
     public String getImageUrl() {
@@ -125,4 +132,10 @@ public class Tour {
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public List<String> getImageUrls() { return imageUrls; }
     public void setImageUrls(List<String> imageUrls) { this.imageUrls = imageUrls; }
+    public boolean isCustomRequest() { return isCustomRequest; }
+    public void setCustomRequest(boolean customRequest) { isCustomRequest = customRequest; }
+    public String getRequestedByUserId() { return requestedByUserId; }
+    public void setRequestedByUserId(String requestedByUserId) { this.requestedByUserId = requestedByUserId; }
+    public String getGuideRequestStatus() { return guideRequestStatus; }
+    public void setGuideRequestStatus(String guideRequestStatus) { this.guideRequestStatus = guideRequestStatus; }
 }

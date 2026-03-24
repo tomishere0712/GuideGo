@@ -9,6 +9,10 @@ public class Review {
     private String tourId;
     @SerializedName("user_id")
     private String userId;
+    @SerializedName("full_name")
+    private String fullName;
+    @SerializedName("tour_title")
+    private String tourTitle;
     @SerializedName("rating")
     private int rating;
     @SerializedName("comment")
@@ -22,6 +26,10 @@ public class Review {
     public void setTourId(String tourId) { this.tourId = tourId; }
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
+    public String getTourTitle() { return tourTitle; }
+    public void setTourTitle(String tourTitle) { this.tourTitle = tourTitle; }
     public int getRating() { return rating; }
     public void setRating(int rating) { this.rating = rating; }
     public String getComment() { return comment; }

@@ -38,6 +38,10 @@
     <style name="BottomNavTextInactive">
         <item name="android:textSize">10sp</item>
     </style>
+    <!-- Smaller text for admin nav (6 items) -->
+    <style name="BottomNavTextSmall">
+        <item name="android:textSize">9sp</item>
+    </style>
 
     <!-- Card style -->
     <style name="CardStyle" parent="Widget.Material3.CardView.Elevated">

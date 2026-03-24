@@ -13,7 +13,8 @@ import com.example.guidego.model.request.RegisterGuideRequest;
 import com.example.guidego.model.response.CreateDataResponse;
 import com.example.guidego.utils.TokenManager;
 
-import java.util.Arrays;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -23,15 +24,12 @@ import retrofit2.Response;
 public class RegisterGuideActivity extends AppCompatActivity {
 
     private ActivityRegisterGuideBinding binding;
-    private TokenManager tokenManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityRegisterGuideBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        tokenManager = new TokenManager(this);
 
         binding.btnBack.setOnClickListener(v -> finish());
         binding.btnSubmit.setOnClickListener(v -> submitRegistration());
@@ -50,18 +48,24 @@ public class RegisterGuideActivity extends AppCompatActivity {
             return;
         }
 
-        int experience = Integer.parseInt(expStr);
-        List<String> languages = null;
+        int experience;
+        try {
+            experience = Integer.parseInt(expStr);
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Số năm kinh nghiệm không hợp lệ", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        List<String> languages = new ArrayList<>();
         if (!langsStr.isEmpty()) {
-            String[] parts = langsStr.split(",");
-            languages = new java.util.ArrayList<>();
-            for (String p : parts) {
-                String trimmed = p.trim();
-                if (!trimmed.isEmpty()) languages.add(trimmed);
+            for (String p : langsStr.split(",")) {
+                String t = p.trim();
+                if (!t.isEmpty()) languages.add(t);
             }
         }
 
-        String userId = tokenManager.getUserId();
+        // Backend đọc user_id từ DTO body — phải gửi kèm
+        String userId = new TokenManager(this).getUserId();
         RegisterGuideRequest request = new RegisterGuideRequest(userId, experience, languages, description);
 
         binding.progressBar.setVisibility(View.VISIBLE);
@@ -81,8 +85,22 @@ public class RegisterGuideActivity extends AppCompatActivity {
                                     Toast.LENGTH_LONG).show();
                             finish();
                         } else {
-                            Toast.makeText(RegisterGuideActivity.this,
-                                    "Đăng ký thất bại. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                            // Show actual server error
+                            String errMsg = "Đăng ký thất bại (code " + response.code() + ")";
+                            try {
+                                if (response.errorBody() != null) {
+                                    String body = response.errorBody().string();
+                                    // Extract message field if present
+                                    if (body.contains("\"message\"")) {
+                                        int start = body.indexOf("\"message\"") + 11;
+                                        int end = body.indexOf("\"", start);
+                                        if (end > start) errMsg = body.substring(start, end);
+                                    } else if (!body.isEmpty()) {
+                                        errMsg = body.length() > 120 ? body.substring(0, 120) : body;
+                                    }
+                                }
+                            } catch (IOException ignored) {}
+                            Toast.makeText(RegisterGuideActivity.this, errMsg, Toast.LENGTH_LONG).show();
                         }
                     }
 
@@ -90,9 +108,9 @@ public class RegisterGuideActivity extends AppCompatActivity {
                     public void onFailure(@NonNull Call<CreateDataResponse> call, @NonNull Throwable t) {
                         binding.progressBar.setVisibility(View.GONE);
                         binding.btnSubmit.setEnabled(true);
-                        Toast.makeText(RegisterGuideActivity.this, "Lỗi kết nối", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RegisterGuideActivity.this,
+                                "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 }
-

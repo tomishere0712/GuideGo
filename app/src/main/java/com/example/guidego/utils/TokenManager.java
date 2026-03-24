@@ -53,6 +53,11 @@ public class TokenManager {
         return prefs.getString(Constants.KEY_USER_PHONE, "");
     }
 
+    /** Returns guide_id extracted from JWT (non-empty only for Guide role). */
+    public String getGuideId() {
+        return prefs.getString("guide_id", "");
+    }
+
     public void saveUserPhone(String phone) {
         prefs.edit().putString(Constants.KEY_USER_PHONE, phone).apply();
     }
@@ -98,11 +103,15 @@ public class TokenManager {
 
             String name = extractString(json, "full_name", "unique_name", "name", "given_name");
 
+            // guide_id is present in JWT for Guide role
+            String guideId = extractString(json, "guide_id");
+
             prefs.edit()
                     .putString(Constants.KEY_USER_ID, userId)
                     .putString(Constants.KEY_USER_ROLE, role)
                     .putString(Constants.KEY_USER_EMAIL, email)
                     .putString(Constants.KEY_USER_NAME, name)
+                    .putString("guide_id", guideId)
                     .apply();
 
             Log.d(TAG, "Decoded JWT: userId=" + userId + ", role=" + role + ", email=" + email);

@@ -258,8 +258,7 @@ public class CreateEditTourActivity extends AppCompatActivity {
                                     finish();
                                 }
                             } else {
-                                Toast.makeText(CreateEditTourActivity.this,
-                                        "Không thể tạo tour. Hãy kiểm tra lại.", Toast.LENGTH_SHORT).show();
+                                showServerError("Không thể tạo tour", response.code(), response.errorBody());
                             }
                         }
 
@@ -267,7 +266,7 @@ public class CreateEditTourActivity extends AppCompatActivity {
                         public void onFailure(@NonNull Call<CreateDataResponse> call, @NonNull Throwable t) {
                             binding.progressBar.setVisibility(View.GONE);
                             binding.btnSave.setEnabled(true);
-                            Toast.makeText(CreateEditTourActivity.this, "Lỗi kết nối", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(CreateEditTourActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
         } else {
@@ -288,8 +287,7 @@ public class CreateEditTourActivity extends AppCompatActivity {
                                     finish();
                                 }
                             } else {
-                                Toast.makeText(CreateEditTourActivity.this,
-                                        "Không thể cập nhật tour", Toast.LENGTH_SHORT).show();
+                                showServerError("Không thể cập nhật tour", response.code(), response.errorBody());
                             }
                         }
 
@@ -297,10 +295,31 @@ public class CreateEditTourActivity extends AppCompatActivity {
                         public void onFailure(@NonNull Call<StatusResponse> call, @NonNull Throwable t) {
                             binding.progressBar.setVisibility(View.GONE);
                             binding.btnSave.setEnabled(true);
-                            Toast.makeText(CreateEditTourActivity.this, "Lỗi kết nối", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(CreateEditTourActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
         }
+    }
+
+    /** Show a user-friendly error, reading the server body when available. */
+    private void showServerError(String prefix, int code, okhttp3.ResponseBody errorBody) {
+        String msg = prefix + " (lỗi " + code + ")";
+        if (code == 500) {
+            msg = prefix + ": Lỗi server (500). Backend cần fix [Range] attribute cho decimal field.";
+        }
+        try {
+            if (errorBody != null) {
+                String body = errorBody.string();
+                if (body.contains("\"message\"")) {
+                    int s = body.indexOf("\"message\"") + 11;
+                    int e = body.indexOf("\"", s);
+                    if (e > s) msg = body.substring(s, e);
+                } else if (body.contains("0.01 is not a valid value")) {
+                    msg = prefix + ": Lỗi server — backend cần sửa [Range] validation cho trường giá tiền.";
+                }
+            }
+        } catch (Exception ignored) {}
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
 
     private void uploadImage(String tourId) {

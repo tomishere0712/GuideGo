@@ -19,7 +19,7 @@ import com.example.guidego.api.ApiClient;
 import com.example.guidego.databinding.FragmentGuideToursBinding;
 import com.example.guidego.model.Guide;
 import com.example.guidego.model.Tour;
-import com.example.guidego.model.response.GuidesResponse;
+import com.example.guidego.model.response.SingleGuideResponse;
 import com.example.guidego.model.response.StatusResponse;
 import com.example.guidego.utils.Constants;
 import com.example.guidego.utils.TokenManager;
@@ -69,7 +69,8 @@ public class GuideToursFragment extends Fragment {
         adapter = new GuideTourAdapter(
                 tour -> openEditTour(tour),
                 tour -> confirmDeleteTour(tour),
-                tour -> openManageSchedules(tour)
+                tour -> openManageSchedules(tour),
+                tour -> openGuideBookings(tour)
         );
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.recyclerView.setAdapter(adapter);
@@ -86,15 +87,14 @@ public class GuideToursFragment extends Fragment {
         binding.progressBar.setVisibility(View.VISIBLE);
         ApiClient.getInstance(requireContext()).getApiService()
                 .getGuideByUserId(userId)
-                .enqueue(new Callback<GuidesResponse>() {
+                .enqueue(new Callback<SingleGuideResponse>() {
                     @Override
-                    public void onResponse(@NonNull Call<GuidesResponse> call,
-                                           @NonNull Response<GuidesResponse> response) {
+                    public void onResponse(@NonNull Call<SingleGuideResponse> call,
+                                           @NonNull Response<SingleGuideResponse> response) {
                         if (!isAdded()) return;
                         if (response.isSuccessful() && response.body() != null
-                                && response.body().getData() != null
-                                && !response.body().getData().isEmpty()) {
-                            currentGuide = response.body().getData().get(0);
+                                && response.body().getData() != null) {
+                            currentGuide = response.body().getData();
                             updateGuideStatusUI();
                             loadMyTours();
                         } else {
@@ -108,7 +108,7 @@ public class GuideToursFragment extends Fragment {
                     }
 
                     @Override
-                    public void onFailure(@NonNull Call<GuidesResponse> call, @NonNull Throwable t) {
+                    public void onFailure(@NonNull Call<SingleGuideResponse> call, @NonNull Throwable t) {
                         if (!isAdded()) return;
                         binding.progressBar.setVisibility(View.GONE);
                         binding.swipeRefresh.setRefreshing(false);
@@ -131,8 +131,9 @@ public class GuideToursFragment extends Fragment {
     }
 
     private void loadMyTours() {
+        // Use the dedicated endpoint — backend filters by authenticated guide automatically
         ApiClient.getInstance(requireContext()).getApiService()
-                .getAllTours()
+                .getGuideRequests()
                 .enqueue(new Callback<List<Tour>>() {
                     @Override
                     public void onResponse(@NonNull Call<List<Tour>> call,
@@ -141,12 +142,11 @@ public class GuideToursFragment extends Fragment {
                         binding.progressBar.setVisibility(View.GONE);
                         binding.swipeRefresh.setRefreshing(false);
                         if (response.isSuccessful() && response.body() != null) {
-                            // Filter tours that belong to current guide
-                            String myUserId = tokenManager.getUserId();
+                            // This screen shows only the guide's own regular tours
+                            // (custom requests from tourists are in the Requests tab)
                             allTours.clear();
                             for (Tour t : response.body()) {
-                                if (currentGuide != null && currentGuide.getId() != null
-                                        && currentGuide.getId().equals(t.getGuideId())) {
+                                if (!t.isCustomRequest()) {
                                     allTours.add(t);
                                 }
                             }
@@ -154,8 +154,11 @@ public class GuideToursFragment extends Fragment {
                                 showEmpty();
                             } else {
                                 binding.layoutEmpty.setVisibility(View.GONE);
+                                binding.recyclerView.setVisibility(View.VISIBLE);
                                 adapter.setTours(allTours);
                             }
+                        } else {
+                            showEmpty();
                         }
                     }
 
@@ -187,6 +190,13 @@ public class GuideToursFragment extends Fragment {
 
     private void openManageSchedules(Tour tour) {
         Intent intent = new Intent(requireContext(), ManageSchedulesActivity.class);
+        intent.putExtra(Constants.EXTRA_TOUR_ID, tour.getId());
+        intent.putExtra("tour_title", tour.getTitle());
+        startActivity(intent);
+    }
+
+    private void openGuideBookings(Tour tour) {
+        Intent intent = new Intent(requireContext(), GuideBookingsActivity.class);
         intent.putExtra(Constants.EXTRA_TOUR_ID, tour.getId());
         intent.putExtra("tour_title", tour.getTitle());
         startActivity(intent);

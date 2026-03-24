@@ -59,11 +59,31 @@ public class AdminUserAdapter extends RecyclerView.Adapter<AdminUserAdapter.View
         void bind(User user) {
             b.tvName.setText(user.getFullName() != null ? user.getFullName() : "—");
             b.tvEmail.setText(user.getEmail() != null ? user.getEmail() : "—");
-            b.tvRole.setText(user.getRole() != null ? user.getRole() : "—");
 
-            if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
-                Glide.with(b.getRoot().getContext()).load(user.getAvatarUrl()).into(b.ivAvatar);
+            // Role text with color
+            String role = user.getRole() != null ? user.getRole() : "—";
+            b.tvRole.setText(role);
+            switch (role) {
+                case "Admin":
+                    b.tvRole.setTextColor(0xFFE53935);
+                    break;
+                case "Guide":
+                    b.tvRole.setTextColor(0xFF1976D2);
+                    break;
+                case "Tourist":
+                    b.tvRole.setTextColor(0xFF388E3C);
+                    break;
+                default:
+                    b.tvRole.setTextColor(0xFF757575);
+                    break;
             }
+
+            Glide.with(b.getRoot().getContext())
+                    .load(user.getAvatarUrl())
+                    .placeholder(com.example.guidego.R.drawable.ic_avatar_default)
+                    .error(com.example.guidego.R.drawable.ic_avatar_default)
+                    .circleCrop()
+                    .into(b.ivAvatar);
 
             b.btnEdit.setOnClickListener(v -> editClick.onEdit(user));
             b.btnDelete.setOnClickListener(v -> deleteClick.onDelete(user));

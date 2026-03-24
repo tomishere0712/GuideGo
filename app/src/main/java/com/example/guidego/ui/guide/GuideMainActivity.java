@@ -13,6 +13,7 @@ public class GuideMainActivity extends AppCompatActivity {
 
     private ActivityGuideMainBinding binding;
     private GuideToursFragment toursFragment;
+    private GuideTourRequestsFragment requestsFragment;
     private ChatListFragment chatListFragment;
     private GuideProfileFragment profileFragment;
     private Fragment activeFragment;
@@ -28,11 +29,13 @@ public class GuideMainActivity extends AppCompatActivity {
 
     private void initFragments() {
         toursFragment = new GuideToursFragment();
+        requestsFragment = new GuideTourRequestsFragment();
         chatListFragment = new ChatListFragment();
         profileFragment = new GuideProfileFragment();
 
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.fragment_container, toursFragment, "tours")
+                .add(R.id.fragment_container, requestsFragment, "requests").hide(requestsFragment)
                 .add(R.id.fragment_container, chatListFragment, "chat").hide(chatListFragment)
                 .add(R.id.fragment_container, profileFragment, "profile").hide(profileFragment)
                 .commit();
@@ -44,6 +47,7 @@ public class GuideMainActivity extends AppCompatActivity {
             Fragment selected = null;
             int id = item.getItemId();
             if (id == R.id.nav_guide_tours) selected = toursFragment;
+            else if (id == R.id.nav_guide_requests) selected = requestsFragment;
             else if (id == R.id.nav_guide_chat) selected = chatListFragment;
             else if (id == R.id.nav_guide_profile) selected = profileFragment;
 

@@ -32,6 +32,14 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     public void addMessage(ChatMessage message) {
+        // Prevent duplicates: both the HTTP response and SignalR can deliver the same message
+        if (message.getId() != null) {
+            for (ChatMessage existing : messages) {
+                if (message.getId().equals(existing.getId())) {
+                    return; // already present — skip
+                }
+            }
+        }
         messages.add(message);
         notifyItemInserted(messages.size() - 1);
     }

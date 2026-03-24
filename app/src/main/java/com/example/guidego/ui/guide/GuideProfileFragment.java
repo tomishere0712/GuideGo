@@ -19,7 +19,7 @@ import com.example.guidego.model.Guide;
 import com.example.guidego.model.User;
 import com.example.guidego.model.request.UpdateGuideRequest;
 import com.example.guidego.model.request.UpdateProfileRequest;
-import com.example.guidego.model.response.GuidesResponse;
+import com.example.guidego.model.response.SingleGuideResponse;
 import com.example.guidego.model.response.StatusResponse;
 import com.example.guidego.ui.auth.LoginActivity;
 import com.example.guidego.utils.TokenManager;
@@ -89,16 +89,15 @@ public class GuideProfileFragment extends Fragment {
         // Load guide profile
         ApiClient.getInstance(requireContext()).getApiService()
                 .getGuideByUserId(userId)
-                .enqueue(new Callback<GuidesResponse>() {
+                .enqueue(new Callback<SingleGuideResponse>() {
                     @Override
-                    public void onResponse(@NonNull Call<GuidesResponse> call,
-                                           @NonNull Response<GuidesResponse> response) {
+                    public void onResponse(@NonNull Call<SingleGuideResponse> call,
+                                           @NonNull Response<SingleGuideResponse> response) {
                         if (!isAdded()) return;
                         binding.progressBar.setVisibility(View.GONE);
                         if (response.isSuccessful() && response.body() != null
-                                && response.body().getData() != null
-                                && !response.body().getData().isEmpty()) {
-                            currentGuide = response.body().getData().get(0);
+                                && response.body().getData() != null) {
+                            currentGuide = response.body().getData();
                             displayGuideInfo();
                         } else {
                             // No guide profile
@@ -108,7 +107,7 @@ public class GuideProfileFragment extends Fragment {
                     }
 
                     @Override
-                    public void onFailure(@NonNull Call<GuidesResponse> call, @NonNull Throwable t) {
+                    public void onFailure(@NonNull Call<SingleGuideResponse> call, @NonNull Throwable t) {
                         if (!isAdded()) return;
                         binding.progressBar.setVisibility(View.GONE);
                     }
@@ -171,7 +170,8 @@ public class GuideProfileFragment extends Fragment {
         }
 
         String userId = tokenManager.getUserId();
-        UpdateProfileRequest request = new UpdateProfileRequest(name, phone);
+        String email = currentUser != null ? currentUser.getEmail() : tokenManager.getUserEmail();
+        UpdateProfileRequest request = new UpdateProfileRequest(name, email, phone);
         binding.progressBar.setVisibility(View.VISIBLE);
 
         ApiClient.getInstance(requireContext()).getApiService()

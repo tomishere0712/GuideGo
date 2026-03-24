@@ -1,16 +1,12 @@
 package com.example.guidego.ui.admin;
 
-import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.example.guidego.R;
 import com.example.guidego.databinding.ActivityAdminMainBinding;
-import com.example.guidego.ui.auth.LoginActivity;
-import com.example.guidego.utils.TokenManager;
 
 public class AdminMainActivity extends AppCompatActivity {
 
@@ -20,6 +16,7 @@ public class AdminMainActivity extends AppCompatActivity {
     private AdminToursFragment toursFragment;
     private AdminLocationsFragment locationsFragment;
     private AdminReviewsFragment reviewsFragment;
+    private AdminProfileFragment profileFragment;
     private Fragment activeFragment;
 
     @Override
@@ -28,28 +25,8 @@ public class AdminMainActivity extends AppCompatActivity {
         binding = ActivityAdminMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        TokenManager tokenManager = new TokenManager(this);
-        binding.tvAdminName.setText(tokenManager.getUserName());
-
-        binding.btnLogout.setOnClickListener(v -> confirmLogout(tokenManager));
-
         initFragments();
         setupBottomNav();
-    }
-
-    private void confirmLogout(TokenManager tokenManager) {
-        new AlertDialog.Builder(this)
-                .setTitle("Đăng xuất")
-                .setMessage("Bạn có chắc muốn đăng xuất?")
-                .setPositiveButton("Đăng xuất", (dialog, which) -> {
-                    tokenManager.clearToken();
-                    Intent intent = new Intent(this, LoginActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
-                })
-                .setNegativeButton("Hủy", null)
-                .show();
     }
 
     private void initFragments() {
@@ -58,6 +35,7 @@ public class AdminMainActivity extends AppCompatActivity {
         toursFragment = new AdminToursFragment();
         locationsFragment = new AdminLocationsFragment();
         reviewsFragment = new AdminReviewsFragment();
+        profileFragment = new AdminProfileFragment();
 
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.fragment_container, usersFragment, "users")
@@ -65,6 +43,7 @@ public class AdminMainActivity extends AppCompatActivity {
                 .add(R.id.fragment_container, toursFragment, "tours").hide(toursFragment)
                 .add(R.id.fragment_container, locationsFragment, "locations").hide(locationsFragment)
                 .add(R.id.fragment_container, reviewsFragment, "reviews").hide(reviewsFragment)
+                .add(R.id.fragment_container, profileFragment, "profile").hide(profileFragment)
                 .commit();
         activeFragment = usersFragment;
     }
@@ -78,6 +57,7 @@ public class AdminMainActivity extends AppCompatActivity {
             else if (id == R.id.nav_admin_tours) selected = toursFragment;
             else if (id == R.id.nav_admin_locations) selected = locationsFragment;
             else if (id == R.id.nav_admin_reviews) selected = reviewsFragment;
+            else if (id == R.id.nav_admin_profile) selected = profileFragment;
 
             if (selected != null && selected != activeFragment) {
                 getSupportFragmentManager().beginTransaction()

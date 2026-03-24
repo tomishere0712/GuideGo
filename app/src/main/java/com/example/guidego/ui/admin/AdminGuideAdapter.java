@@ -73,15 +73,17 @@ public class AdminGuideAdapter extends RecyclerView.Adapter<AdminGuideAdapter.Vi
             b.tvRating.setText(String.format("%.1f ★", guide.getRating()));
             b.tvExperience.setText(guide.getExperienceYears() + " năm KN");
 
-            // Verified badge
+            // Verified badge + button visibility
             if (guide.isVerified()) {
                 b.tvStatus.setText("Đã duyệt");
                 b.tvStatus.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorSuccess));
                 b.btnVerify.setVisibility(View.GONE);
+                b.btnReject.setVisibility(View.GONE); // already approved — no need to reject
             } else {
                 b.tvStatus.setText("Chờ duyệt");
                 b.tvStatus.setBackgroundColor(ContextCompat.getColor(ctx, R.color.colorWarning));
                 b.btnVerify.setVisibility(View.VISIBLE);
+                b.btnReject.setVisibility(View.VISIBLE);
             }
 
             // Display user info
@@ -128,12 +130,12 @@ public class AdminGuideAdapter extends RecyclerView.Adapter<AdminGuideAdapter.Vi
             b.tvName.setText(user.getFullName() != null && !user.getFullName().isEmpty()
                     ? user.getFullName() : "—");
             b.tvEmail.setText(user.getEmail() != null ? user.getEmail() : "—");
-            if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
-                Glide.with(b.getRoot().getContext())
-                        .load(user.getAvatarUrl())
-                        .circleCrop()
-                        .into(b.ivAvatar);
-            }
+            Glide.with(b.getRoot().getContext())
+                    .load(user.getAvatarUrl())
+                    .placeholder(R.drawable.ic_avatar_default)
+                    .error(R.drawable.ic_avatar_default)
+                    .circleCrop()
+                    .into(b.ivAvatar);
         }
     }
 }

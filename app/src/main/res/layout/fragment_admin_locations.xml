@@ -35,6 +35,27 @@
                 android:layout_marginTop="2dp"
                 android:textColor="#CCFFFFFF"
                 android:textSize="13sp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:hint="Tìm kiếm địa điểm..."
+                app:boxStrokeColor="#66FFFFFF"
+                app:hintTextColor="#CCFFFFFF"
+                app:boxBackgroundColor="#33FFFFFF">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:imeOptions="actionSearch"
+                    android:textColor="@color/white"
+                    android:textColorHint="#AAFFFFFF" />
+            </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
 

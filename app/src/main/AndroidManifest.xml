@@ -114,5 +114,31 @@
             android:name=".ui.admin.AdminMainActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
+
+        <!-- Tourist Tour Requests -->
+        <activity
+            android:name=".ui.tour.MyTourRequestsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Write Review -->
+        <activity
+            android:name=".ui.booking.WriteReviewActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- My Reviews (Tourist review history) -->
+        <activity
+            android:name=".ui.review.MyReviewsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- Guide: manage bookings per tour -->
+        <activity
+            android:name=".ui.guide.GuideBookingsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
     </application>
 </manifest>

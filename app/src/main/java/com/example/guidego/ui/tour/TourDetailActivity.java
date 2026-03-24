@@ -16,11 +16,13 @@ import com.example.guidego.R;
 import com.example.guidego.api.ApiClient;
 import com.example.guidego.databinding.ActivityTourDetailBinding;
 import com.example.guidego.model.ChatRoom;
+import com.example.guidego.model.Review;
 import com.example.guidego.model.Tour;
 import com.example.guidego.model.TourSchedule;
 import com.example.guidego.model.request.AddToCartRequest;
 import com.example.guidego.model.response.StatusResponse;
 import com.example.guidego.ui.chat.ChatActivity;
+import com.example.guidego.ui.review.ReviewAdapter;
 import com.example.guidego.utils.Constants;
 import com.example.guidego.utils.FormatUtils;
 import com.google.android.gms.maps.model.LatLng;
@@ -37,8 +39,10 @@ import retrofit2.Response;
 public class TourDetailActivity extends AppCompatActivity{
     private ActivityTourDetailBinding binding;
     private ScheduleAdapter scheduleAdapter;
+    private ReviewAdapter reviewAdapter;
     private Tour currentTour;
     private int peopleCount = 1;
+    private String currentTourId;  // kept for onResume refresh
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,10 +52,12 @@ public class TourDetailActivity extends AppCompatActivity{
 
         String tourId = getIntent().getStringExtra(Constants.EXTRA_TOUR_ID);
         if (tourId == null) { finish(); return; }
+        currentTourId = tourId;
 
         binding.mapPreview.onCreate(savedInstanceState);
 
         setupScheduleAdapter();
+        setupReviewAdapter();
         setupPeopleCounter();
 
         binding.btnBack.setOnClickListener(v -> finish());
@@ -63,7 +69,36 @@ public class TourDetailActivity extends AppCompatActivity{
     }
 
     @Override
-    protected void onResume() { super.onResume(); binding.mapPreview.onResume(); }
+    protected void onResume() {
+        super.onResume();
+        binding.mapPreview.onResume();
+        // Silently refresh rating badge + reviews when returning from WriteReviewActivity
+        if (currentTourId != null && currentTour != null) {
+            refreshRatingAndReviews(currentTourId);
+        }
+    }
+
+    /** Lightweight refresh: just reload the tour rating and review list, no full UI rebuild */
+    private void refreshRatingAndReviews(String tourId) {
+        // Refresh rating from tour endpoint
+        ApiClient.getInstance(this).getApiService()
+                .getTourById(tourId)
+                .enqueue(new retrofit2.Callback<Tour>() {
+                    @Override
+                    public void onResponse(retrofit2.Call<Tour> call,
+                                           retrofit2.Response<Tour> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            double newRating = response.body().getRating();
+                            binding.tvRatingBadge.setText(
+                                    com.example.guidego.utils.FormatUtils.formatRating(newRating) + " ★");
+                        }
+                    }
+                    @Override
+                    public void onFailure(retrofit2.Call<Tour> call, Throwable t) {}
+                });
+        // Refresh review list
+        loadTourReviews(tourId);
+    }
     @Override
     protected void onPause() { super.onPause(); binding.mapPreview.onPause(); }
     @Override
@@ -98,6 +133,15 @@ public class TourDetailActivity extends AppCompatActivity{
         binding.rvSchedules.setAdapter(scheduleAdapter);
     }
 
+    private void setupReviewAdapter() {
+        reviewAdapter = new ReviewAdapter();
+        // Read-only in TourDetail: no edit/delete buttons
+        reviewAdapter.setShowActions(false);
+        reviewAdapter.setShowTourTitle(false);
+        binding.rvReviews.setLayoutManager(new LinearLayoutManager(this));
+        binding.rvReviews.setAdapter(reviewAdapter);
+    }
+
     private void setupPeopleCounter() {
         binding.tvPeopleCount.setText(String.valueOf(peopleCount));
         binding.btnDecrease.setOnClickListener(v -> {
@@ -128,6 +172,8 @@ public class TourDetailActivity extends AppCompatActivity{
                             displayTour(currentTour);
                             // Fetch fresh schedule data separately to get up-to-date available_slots
                             loadFreshSchedules(tourId);
+                            // Load reviews for this tour
+                            loadTourReviews(tourId);
                         } else {
                             Toast.makeText(TourDetailActivity.this, "Không tìm thấy tour", Toast.LENGTH_SHORT).show();
                             finish();
@@ -161,6 +207,44 @@ public class TourDetailActivity extends AppCompatActivity{
                     @Override
                     public void onFailure(Call<List<TourSchedule>> call, Throwable t) {
                         // Không làm gì — schedules từ tour response vẫn được hiển thị
+                    }
+                });
+    }
+
+    /** Load reviews for this tour: GET /api/review?tour_id={tourId}
+     *  Also recalculates the rating badge from actual reviews (tour.rating from API
+     *  reflects guide overall rating, not tour-specific average). */
+    private void loadTourReviews(String tourId) {
+        ApiClient.getInstance(this).getApiService()
+                .getReviewsByTour(tourId)
+                .enqueue(new Callback<List<Review>>() {
+                    @Override
+                    public void onResponse(Call<List<Review>> call, Response<List<Review>> response) {
+                        if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                            List<Review> reviews = response.body();
+                            reviewAdapter.setReviews(reviews);
+                            binding.rvReviews.setVisibility(View.VISIBLE);
+                            binding.tvNoReviews.setVisibility(View.GONE);
+                            binding.tvReviewCount.setText(reviews.size() + " đánh giá");
+
+                            // Calculate tour-specific average rating from actual reviews
+                            double sum = 0;
+                            for (Review r : reviews) sum += r.getRating();
+                            double avg = sum / reviews.size();
+                            binding.tvRatingBadge.setText(
+                                    FormatUtils.formatRating(avg) + " ★");
+                        } else {
+                            binding.rvReviews.setVisibility(View.GONE);
+                            binding.tvNoReviews.setVisibility(View.VISIBLE);
+                            binding.tvReviewCount.setText("0 đánh giá");
+                            // No reviews → show 0.0
+                            binding.tvRatingBadge.setText("0.0 ★");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<Review>> call, Throwable t) {
+                        binding.tvNoReviews.setVisibility(View.VISIBLE);
                     }
                 });
     }

@@ -18,7 +18,7 @@
             android:orientation="vertical"
             android:paddingHorizontal="16dp"
             android:paddingTop="48dp"
-            android:paddingBottom="14dp">
+            android:paddingBottom="0dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -26,13 +26,14 @@
                 android:text="Quản lý Người dùng"
                 android:textColor="@color/white"
                 android:textSize="20sp"
-                android:fontFamily="sans-serif-medium" />
+                android:fontFamily="sans-serif-medium"
+                android:paddingBottom="10dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilSearch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginBottom="6dp"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:hint="Tìm kiếm người dùng..."
                 app:boxStrokeColor="#66FFFFFF"
@@ -48,6 +49,23 @@
                     android:textColor="@color/white"
                     android:textColorHint="#AAFFFFFF" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Role filter tabs -->
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabRoleFilter"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:background="@color/colorPrimary"
+                app:tabSelectedTextColor="@color/white"
+                app:tabTextColor="#AAFFFFFF"
+                app:tabIndicatorColor="@color/white"
+                app:tabIndicatorHeight="3dp"
+                app:tabRippleColor="@android:color/transparent"
+                app:tabBackground="@android:color/transparent"
+                app:tabTextAppearance="@android:style/TextAppearance.Small"
+                app:tabMode="fixed"
+                app:tabGravity="fill" />
+
         </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
 

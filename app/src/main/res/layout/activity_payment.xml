@@ -23,6 +23,7 @@
             android:layout_height="36dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_arrow_back"
+                android:tint="@color/white"
             android:padding="6dp" />
 
         <TextView

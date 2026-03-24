@@ -25,7 +25,9 @@
                 android:id="@+id/ivAvatar"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:src="@drawable/bg_avatar_placeholder" />
+                android:src="@drawable/ic_person_placeholder"
+                app:civ_border_width="2dp"
+                app:civ_border_color="@color/white" />
 
             <TextView
                 android:id="@+id/tvName"
@@ -50,11 +52,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/bg_city_chip"
+                android:background="#33FFFFFF"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:paddingHorizontal="12dp"
-                android:paddingVertical="4dp">
+                android:paddingVertical="5dp">
 
                 <ImageView
                     android:layout_width="14dp"

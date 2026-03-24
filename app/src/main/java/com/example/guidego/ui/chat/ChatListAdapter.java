@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.guidego.R;
 import com.example.guidego.model.ChatRoom;
+import com.example.guidego.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +23,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
 
     private List<ChatRoom> chats = new ArrayList<>();
     private OnChatClickListener listener;
+    private final boolean isGuide;  // true → show tourist name; false → show guide name
 
-    public ChatListAdapter(String currentUserId) {
-        // currentUserId reserved for future use (e.g. guide role)
+    public ChatListAdapter(String currentUserRole) {
+        this.isGuide = Constants.ROLE_GUIDE.equals(currentUserRole);
     }
 
     public void setListener(OnChatClickListener listener) { this.listener = listener; }
@@ -32,6 +34,19 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
     public void setChats(List<ChatRoom> chats) {
         this.chats = chats;
         notifyDataSetChanged();
+    }
+
+    /** Returns the display name for the other party in this chat */
+    public String getOtherPartyName(ChatRoom chat) {
+        if (isGuide) {
+            // Guide views → show tourist name
+            return (chat.getTouristName() != null && !chat.getTouristName().isEmpty())
+                    ? chat.getTouristName() : "Du khách";
+        } else {
+            // Tourist views → show guide name
+            return (chat.getGuideName() != null && !chat.getGuideName().isEmpty())
+                    ? chat.getGuideName() : "Hướng dẫn viên";
+        }
     }
 
     @NonNull
@@ -45,15 +60,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ChatRoom chat = chats.get(position);
-
-        // App chỉ dành cho Tourist → luôn hiển thị tên hướng dẫn viên
-        String displayName = (chat.getGuideName() != null && !chat.getGuideName().isEmpty())
-                ? chat.getGuideName()
-                : "Hướng dẫn viên";
+        String displayName = getOtherPartyName(chat);
 
         holder.tvName.setText(displayName);
         holder.tvAvatar.setText(String.valueOf(displayName.charAt(0)).toUpperCase());
-
         holder.tvLastMessage.setText(
                 (chat.getLastMessage() != null && !chat.getLastMessage().isEmpty())
                         ? chat.getLastMessage()
@@ -72,10 +82,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
 
         ViewHolder(@NonNull View v) {
             super(v);
-            tvName = v.findViewById(R.id.tv_chat_name);
+            tvName        = v.findViewById(R.id.tv_chat_name);
             tvLastMessage = v.findViewById(R.id.tv_last_message);
-            tvAvatar = v.findViewById(R.id.tv_avatar_letter);
+            tvAvatar      = v.findViewById(R.id.tv_avatar_letter);
         }
     }
 }
-

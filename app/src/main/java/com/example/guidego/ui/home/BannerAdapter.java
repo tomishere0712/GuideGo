@@ -11,32 +11,21 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.guidego.R;
+import com.example.guidego.model.Tour;
+import com.example.guidego.ui.tour.TourDetailActivity;
+import android.content.Intent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.ViewHolder> {
 
-    private static final String[] IMAGES = {
-            "https://picsum.photos/seed/hanoi2024/800/400",
-            "https://picsum.photos/seed/danang2024/800/400",
-            "https://picsum.photos/seed/hoian2024/800/400",
-            "https://picsum.photos/seed/halong2024/800/400",
-            "https://picsum.photos/seed/saigon2024/800/400"
-    };
+    private List<Tour> tours = new ArrayList<>();
 
-    private static final String[] TITLES = {
-            "Hà Nội - Thủ đô ngàn năm văn hiến",
-            "Đà Nẵng - Thành phố đáng sống",
-            "Hội An - Phố cổ di sản thế giới",
-            "Hạ Long - Kỳ quan thiên nhiên thế giới",
-            "TP. Hồ Chí Minh - Thành phố năng động"
-    };
-
-    private static final String[] SUBTITLES = {
-            "Khám phá văn hóa và lịch sử",
-            "Biển xanh cát trắng nắng vàng",
-            "Đèn lồng lung linh quyến rũ",
-            "Vịnh nước xanh trong vắt",
-            "Ẩm thực và cuộc sống sôi động"
-    };
+    public void setTours(List<Tour> data) {
+        this.tours = data != null ? data : new ArrayList<>();
+        notifyDataSetChanged();
+    }
 
     @NonNull
     @Override
@@ -47,17 +36,35 @@ public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Tour tour = tours.get(position);
+
+        // Load actual tour image
         Glide.with(holder.itemView.getContext())
-                .load(IMAGES[position])
+                .load(tour.getImageUrl())
                 .centerCrop()
                 .placeholder(R.drawable.bg_placeholder)
+                .error(R.drawable.bg_placeholder)
                 .into(holder.ivBanner);
-        holder.tvDestination.setText(TITLES[position]);
-        holder.tvSubtitle.setText(SUBTITLES[position]);
+
+        // Title = tour name
+        holder.tvDestination.setText(tour.getTitle() != null ? tour.getTitle() : "");
+
+        // Subtitle = city or location
+        String sub = tour.getCity() != null && !tour.getCity().isEmpty()
+                ? tour.getCity()
+                : (tour.getLocationName() != null ? tour.getLocationName() : "");
+        holder.tvSubtitle.setText(sub);
+
+        // Tap banner → open tour detail
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), TourDetailActivity.class);
+            intent.putExtra("tour_id", tour.getId());
+            v.getContext().startActivity(intent);
+        });
     }
 
     @Override
-    public int getItemCount() { return IMAGES.length; }
+    public int getItemCount() { return tours.size(); }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivBanner;
@@ -71,4 +78,3 @@ public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.ViewHolder
         }
     }
 }
-

@@ -1,5 +1,6 @@
 package com.example.guidego.ui.booking;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +15,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.guidego.api.ApiClient;
 import com.example.guidego.databinding.FragmentBookingBinding;
 import com.example.guidego.model.Booking;
+import com.example.guidego.model.Review;
 import com.example.guidego.model.response.StatusResponse;
+import com.example.guidego.ui.tour.MyTourRequestsActivity;
+import com.example.guidego.utils.Constants;
 import com.example.guidego.utils.TokenManager;
 
 import java.util.List;
@@ -30,7 +34,8 @@ public class BookingFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         binding = FragmentBookingBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -43,6 +48,33 @@ public class BookingFragment extends Fragment {
         binding.rvBookings.setAdapter(adapter);
 
         adapter.setOnCancelListener((booking, position) -> cancelBooking(booking, position));
+
+        // Open WriteReviewActivity in CREATE mode
+        adapter.setOnReviewListener(booking -> {
+            Intent intent = new Intent(requireContext(), WriteReviewActivity.class);
+            intent.putExtra(Constants.EXTRA_TOUR_ID, booking.getTourId());
+            intent.putExtra("tour_title", booking.getTourTitle());
+            intent.putExtra("schedule_id", booking.getScheduleId());
+            intent.putExtra("booking_id", booking.getId());
+            startActivity(intent);
+        });
+
+        // Open WriteReviewActivity in EDIT mode
+        adapter.setOnEditReviewListener((booking, existing) -> {
+            Intent intent = new Intent(requireContext(), WriteReviewActivity.class);
+            intent.putExtra(Constants.EXTRA_TOUR_ID, booking.getTourId());
+            intent.putExtra("tour_title", booking.getTourTitle());
+            intent.putExtra("schedule_id", booking.getScheduleId());
+            intent.putExtra("booking_id", booking.getId());
+            // Edit mode extras
+            intent.putExtra("review_id", existing.getId());
+            intent.putExtra("existing_rating", existing.getRating());
+            intent.putExtra("existing_comment", existing.getComment());
+            startActivity(intent);
+        });
+
+        binding.btnMyRequests.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), MyTourRequestsActivity.class)));
     }
 
     @Override
@@ -67,12 +99,16 @@ public class BookingFragment extends Fragment {
                 .getBookings(userId)
                 .enqueue(new Callback<List<Booking>>() {
                     @Override
-                    public void onResponse(@NonNull Call<List<Booking>> call, @NonNull Response<List<Booking>> response) {
+                    public void onResponse(@NonNull Call<List<Booking>> call,
+                                           @NonNull Response<List<Booking>> response) {
                         if (!isAdded()) return;
                         binding.progressBar.setVisibility(View.GONE);
-                        if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                        if (response.isSuccessful() && response.body() != null
+                                && !response.body().isEmpty()) {
                             adapter.setBookings(response.body());
                             binding.rvBookings.setVisibility(View.VISIBLE);
+                            // Also load reviews to reflect "Đã đánh giá" state
+                            loadMyReviews();
                         } else {
                             binding.emptyState.setVisibility(View.VISIBLE);
                         }
@@ -88,12 +124,33 @@ public class BookingFragment extends Fragment {
                 });
     }
 
+    /** Fetch tourist's own reviews and update adapter so reviewed bookings show correct state */
+    private void loadMyReviews() {
+        ApiClient.getInstance(requireContext()).getApiService()
+                .getMyReviews()
+                .enqueue(new Callback<List<Review>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<Review>> call,
+                                           @NonNull Response<List<Review>> response) {
+                        if (!isAdded()) return;
+                        if (response.isSuccessful() && response.body() != null) {
+                            adapter.setMyReviews(response.body());
+                        }
+                    }
+                    @Override
+                    public void onFailure(@NonNull Call<List<Review>> call, @NonNull Throwable t) {
+                        // silently ignore — review state just won't be shown
+                    }
+                });
+    }
+
     private void cancelBooking(Booking booking, int position) {
         ApiClient.getInstance(requireContext()).getApiService()
                 .cancelBooking(booking.getId())
                 .enqueue(new Callback<StatusResponse>() {
                     @Override
-                    public void onResponse(@NonNull Call<StatusResponse> call, @NonNull Response<StatusResponse> response) {
+                    public void onResponse(@NonNull Call<StatusResponse> call,
+                                           @NonNull Response<StatusResponse> response) {
                         if (!isAdded()) return;
                         if (response.isSuccessful()) {
                             Toast.makeText(requireContext(), "Đã hủy đơn thành công", Toast.LENGTH_SHORT).show();
@@ -102,7 +159,6 @@ public class BookingFragment extends Fragment {
                             Toast.makeText(requireContext(), "Không thể hủy đơn", Toast.LENGTH_SHORT).show();
                         }
                     }
-
                     @Override
                     public void onFailure(@NonNull Call<StatusResponse> call, @NonNull Throwable t) {
                         if (isAdded())
@@ -117,4 +173,3 @@ public class BookingFragment extends Fragment {
         binding = null;
     }
 }
-

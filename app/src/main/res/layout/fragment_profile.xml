@@ -153,6 +153,19 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
+        <!-- My Reviews Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_my_reviews"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="12dp"
+            android:text="⭐  Lịch sử đánh giá"
+            android:textColor="@color/colorPrimary"
+            app:strokeColor="@color/colorPrimary"
+            app:cornerRadius="12dp" />
+
         <!-- Logout Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_logout"

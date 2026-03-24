@@ -25,7 +25,7 @@
                 android:id="@+id/ivAvatar"
                 android:layout_width="52dp"
                 android:layout_height="52dp"
-                android:src="@drawable/bg_avatar_placeholder" />
+                android:src="@drawable/ic_avatar_default" />
 
             <LinearLayout
                 android:layout_width="0dp"

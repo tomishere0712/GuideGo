@@ -19,6 +19,7 @@ import com.example.guidego.model.User;
 import com.example.guidego.model.request.UpdateProfileRequest;
 import com.example.guidego.model.response.StatusResponse;
 import com.example.guidego.ui.auth.LoginActivity;
+import com.example.guidego.ui.review.MyReviewsActivity;
 import com.example.guidego.utils.FormatUtils;
 import com.example.guidego.utils.TokenManager;
 
@@ -48,6 +49,8 @@ public class ProfileFragment extends Fragment {
         binding.btnEdit.setOnClickListener(v -> toggleEditMode());
         binding.btnSave.setOnClickListener(v -> saveProfile());
         binding.btnLogout.setOnClickListener(v -> confirmLogout());
+        binding.btnMyReviews.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), MyReviewsActivity.class)));
 
         loadProfile();
     }
