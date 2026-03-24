@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.guidego.R;
+import com.example.guidego.model.ChatMessage;
 import com.example.guidego.model.ChatRoom;
 import com.example.guidego.utils.Constants;
 
@@ -34,6 +35,27 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
     public void setChats(List<ChatRoom> chats) {
         this.chats = chats;
         notifyDataSetChanged();
+    }
+
+    /**
+     * Called when a new message arrives via SignalR.
+     * Updates the last message preview and moves the chat to the top.
+     */
+    public void updateLastMessage(ChatMessage message) {
+        for (int i = 0; i < chats.size(); i++) {
+            if (chats.get(i).getId().equals(message.getChatId())) {
+                chats.get(i).setLastMessage(message.getContent());
+                if (i > 0) {
+                    // Move to top
+                    ChatRoom moved = chats.remove(i);
+                    chats.add(0, moved);
+                    notifyDataSetChanged();
+                } else {
+                    notifyItemChanged(0);
+                }
+                return;
+            }
+        }
     }
 
     /** Returns the display name for the other party in this chat */

@@ -1,6 +1,7 @@
 package com.example.guidego.ui.chat;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -16,6 +17,7 @@ import com.example.guidego.utils.Constants;
 import com.example.guidego.utils.TokenManager;
 import com.microsoft.signalr.HubConnection;
 import com.microsoft.signalr.HubConnectionBuilder;
+import com.microsoft.signalr.HubConnectionState;
 
 import java.util.List;
 
@@ -26,6 +28,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ChatActivity extends AppCompatActivity {
+
+    private static final String TAG = "ChatActivity";
 
     private ActivityChatBinding binding;
     private MessageAdapter messageAdapter;
@@ -100,23 +104,28 @@ public class ChatActivity extends AppCompatActivity {
         hubConnection.on("ReceiveMessage", message -> {
             if (chatId.equals(message.getChatId())) {
                 runOnUiThread(() -> {
-                    // addMessage is dedup-safe: if HTTP response already added this message
-                    // (same id), it will be skipped automatically.
                     messageAdapter.addMessage(message);
                     scrollToBottom();
                 });
             }
         }, ChatMessage.class);
 
-        // Kết nối và tham gia phòng chat
+        // Kết nối → sau khi connected thì join phòng chat (send() là void, gọi trực tiếp)
         disposables.add(
                 hubConnection.start()
+                        .doOnComplete(() -> {
+                            hubConnection.send("JoinChat", chatId);
+                            Log.d(TAG, "Joined chat room: " + chatId);
+                        })
                         .subscribe(
-                                () -> hubConnection.invoke("JoinChat", chatId),
-                                error -> runOnUiThread(() ->
-                                        Toast.makeText(this, "Không thể kết nối real-time",
-                                                Toast.LENGTH_SHORT).show()
-                                )
+                                () -> Log.d(TAG, "SignalR connected"),
+                                error -> {
+                                    Log.e(TAG, "SignalR connect failed", error);
+                                    runOnUiThread(() ->
+                                            Toast.makeText(this, "Không thể kết nối real-time",
+                                                    Toast.LENGTH_SHORT).show()
+                                    );
+                                }
                         )
         );
     }
@@ -165,8 +174,10 @@ public class ChatActivity extends AppCompatActivity {
         super.onDestroy();
         disposables.clear();
         if (hubConnection != null) {
-            hubConnection.invoke("LeaveChat", chatId);
-            hubConnection.stop();
+            if (hubConnection.getConnectionState() == HubConnectionState.CONNECTED) {
+                hubConnection.send("LeaveChat", chatId); // void — fire and forget
+            }
+            hubConnection.stop().subscribe(() -> {}, e -> Log.e(TAG, "Stop error", e));
         }
     }
 }

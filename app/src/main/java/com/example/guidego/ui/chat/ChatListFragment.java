@@ -2,6 +2,7 @@ package com.example.guidego.ui.chat;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,23 +15,32 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.guidego.api.ApiClient;
 import com.example.guidego.databinding.FragmentChatListBinding;
+import com.example.guidego.model.ChatMessage;
 import com.example.guidego.model.ChatRoom;
 import com.example.guidego.model.User;
-import com.example.guidego.ui.chat.ChatActivity;
 import com.example.guidego.utils.Constants;
 import com.example.guidego.utils.TokenManager;
+import com.microsoft.signalr.HubConnection;
+import com.microsoft.signalr.HubConnectionBuilder;
+import com.microsoft.signalr.HubConnectionState;
 
 import java.util.List;
 
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ChatListFragment extends Fragment {
 
+    private static final String TAG = "ChatListFragment";
+
     private FragmentChatListBinding binding;
     private ChatListAdapter adapter;
     private TokenManager tokenManager;
+    private HubConnection hubConnection;
+    private final CompositeDisposable disposables = new CompositeDisposable();
 
     @Nullable
     @Override
@@ -50,13 +60,60 @@ public class ChatListFragment extends Fragment {
         adapter.setListener(chat -> openChat(chat));
         binding.rvChats.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvChats.setAdapter(adapter);
+
+        loadChats();
+        connectSignalR();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         loadChats();
+        // Reconnect if disconnected (e.g. after returning from ChatActivity)
+        if (hubConnection == null
+                || hubConnection.getConnectionState() == HubConnectionState.DISCONNECTED) {
+            connectSignalR();
+        }
     }
+
+    // ─── SignalR ─────────────────────────────────────────────────────────────────
+
+    private void connectSignalR() {
+        String token = tokenManager.getToken();
+        if (token == null) return;
+
+        // Clean up previous connection if any
+        disconnectSignalR();
+
+        String hubUrl = ApiClient.getInstance(requireContext()).getHubUrl();
+        hubConnection = HubConnectionBuilder.create(hubUrl)
+                .withAccessTokenProvider(Single.just(token))
+                .build();
+
+        // Lắng nghe tin nhắn mới từ bất kỳ phòng chat nào → cập nhật preview
+        hubConnection.on("ReceiveMessage", message -> {
+            if (!isAdded()) return;
+            requireActivity().runOnUiThread(() -> adapter.updateLastMessage(message));
+        }, ChatMessage.class);
+
+        disposables.add(
+                hubConnection.start()
+                        .subscribe(
+                                () -> Log.d(TAG, "ChatList SignalR connected"),
+                                err -> Log.w(TAG, "ChatList SignalR failed: " + err.getMessage())
+                        )
+        );
+    }
+
+    private void disconnectSignalR() {
+        disposables.clear();
+        if (hubConnection != null) {
+            hubConnection.stop().subscribe(() -> {}, e -> {});
+            hubConnection = null;
+        }
+    }
+
+    // ─── HTTP ────────────────────────────────────────────────────────────────────
 
     private void loadChats() {
         binding.progressBar.setVisibility(View.VISIBLE);
@@ -148,13 +205,13 @@ public class ChatListFragment extends Fragment {
     private void enrichFromMessages(ChatRoom chat, String myUserId) {
         ApiClient.getInstance(requireContext()).getApiService()
                 .getChatMessages(chat.getId())
-                .enqueue(new Callback<List<com.example.guidego.model.ChatMessage>>() {
+                .enqueue(new Callback<List<ChatMessage>>() {
                     @Override
-                    public void onResponse(@NonNull Call<List<com.example.guidego.model.ChatMessage>> call,
-                                           @NonNull Response<List<com.example.guidego.model.ChatMessage>> response) {
+                    public void onResponse(@NonNull Call<List<ChatMessage>> call,
+                                           @NonNull Response<List<ChatMessage>> response) {
                         if (!isAdded()) return;
                         if (response.isSuccessful() && response.body() != null) {
-                            for (com.example.guidego.model.ChatMessage msg : response.body()) {
+                            for (ChatMessage msg : response.body()) {
                                 String senderId = msg.getSenderId();
                                 String senderName = msg.getSenderName();
                                 if (senderId != null && !senderId.equals(myUserId)
@@ -170,8 +227,7 @@ public class ChatListFragment extends Fragment {
                         }
                     }
                     @Override
-                    public void onFailure(@NonNull Call<List<com.example.guidego.model.ChatMessage>> call,
-                                          @NonNull Throwable t) {}
+                    public void onFailure(@NonNull Call<List<ChatMessage>> call, @NonNull Throwable t) {}
                 });
     }
 
@@ -186,6 +242,7 @@ public class ChatListFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        disconnectSignalR();
         binding = null;
     }
 }
